@@ -1,0 +1,72 @@
+Casey, M. A., & Westner, A. (2000, August). Separation of mixed audio sources by independent subspace analysis. In Proceedings of the International Computer Music Conference (pp. 154-161).
+
+no me Orife, I. F. O. (2001). Riddim: A rhythm analysis and decomposition tool based on independent subspace analysis (Doctoral dissertation, DARTMOUTH COLLEGE Hanover, New Hampshire).
+
+Casey, M. (2001). General sound classification and similarity in MPEG-7. Organised Sound, 6(02), 153-164.
+Casey, M. A. (2002). Sound Classification and Similarity. Introduction to MPEG-7: Multimedia Content Description Interface, 309-317.
+
+FitzGerald, D., Lawlor, R., & Coyle, E. (2002). Sub-band independent subspace analysis for drum transcription.
+
+FitzGerald, D., Lawlor, R., & Coyle, E. (2003, March). Prior subspace analysis for drum transcription. In Audio Engineering Society Convention 114. Audio Engineering Society.
+
+FitzGerald, D., Lawlor, B., & Coyle, E. (2003). Drum transcription in the presence of pitched instruments using prior subspace analysis.
+
+FitzGerald, D., Lawlor, B., & Coyle, E. (2003). Drum transcription using automatic grouping of events and prior subspace analysis. In Proceedings of the 4th European Workshop on Image Analysis for Multimediainteractive Services. World Scientific Publishing.
+
+Uhle, C., Dittmar, C., & Sporer, T. (2003, April). Extraction of drum tracks from polyphonic music using independent subspace analysis. In Proc. ICA (pp. 843-847).
+
+Paulus, J., & Klapuri, A. (2003, September). Model-based event labeling in the transcription of percussive audio signals. In Proc. Digital Audio Effects Workshop (DAFx).
+
+Dittmar, C., & Uhle, C. (2004, May). Further steps towards drum transcription of polyphonic music. In Audio Engineering Society Convention 116. Audio Engineering Society.
+
+FitzGerald, D. (2004). Automatic drum transcription and source separation (Doctoral dissertation, Dublin Institute of Technology).
+
+Gillet, O., & Richard, G. (2004, May). Automatic transcription of drum loops. In Acoustics, Speech, and Signal Processing, 2004. Proceedings.(ICASSP'04). IEEE International Conference on (Vol. 4, pp. iv-269). IEEE.
+
+Tanghe, K., Lesaffre, M., Degroeve, S., Leman, M., De Baets, B., & Martens, J. (2005). Collecting ground truth annotations for drum detection in polyphonic music. In Proceedings of the 6th International Conference on Music Information Retrieval (pp. 50-57).
+
+Tanghe, K., Degroeve, S., & De Baets, B. (2005). An algorithm for detecting and labeling drum events in polyphonic music. Proceedings of the 1st Annual Music Information Retrieval Evaluation Exchange, 11-15.
+
+Dittmar, C. (2005). Drum detection from polyphonic audio via detailed analysis of the time frequency domain. 1st Music Information Retrieval Evaluation eXchange (MIREX).
+
+Barry, D., Fitzgerald, D., Coyle, E., & Lawlor, B. (2005). Drum source separation using percussive feature detection and spectral modulation.
+
+Helén, M., & Virtanen, T. (2005, September). Separation of drums from polyphonic music using non-negative matrix factorization and support vector machine. In Proc. EUSIPCO (Vol. 2005).
+
+Gillet, O., & Richard, G. (2005, March). Automatic transcription of drum sequences using audiovisual features. In Acoustics, Speech, and Signal Processing, 2005. Proceedings.(ICASSP'05). IEEE International Conference on (Vol. 3, pp. iii-205). IEEE.
+
+Gillet, O., & Richard, G. (2005, September). Drum Track Transcription of Polyphonic Music Using Noise Subspace Projection. In ISMIR (pp. 92-99).
+
+Gillet, O., & Richard, G. (2005, October). Extraction and remixing of drum tracks from polyphonic music signals. In Applications of Signal Processing to Audio and Acoustics, 2005. IEEE Workshop on (pp. 315-318). IEEE.
+
+Tzanetakis, G., Kapur, A., & Mcwalter, R. I. (2005, October). Subband-based Drum Transcription for Audio Signals. In Multimedia Signal Processing, 2005 IEEE 7th Workshop on (pp. 1-4). IEEE.
+
+Paulus, J. (2006, May). Acoustic modelling of drum sounds with hidden Markov models for music transcription. In Acoustics, Speech and Signal Processing, 2006. ICASSP 2006 Proceedings. 2006 IEEE International Conference on (Vol. 5, pp. V-V). IEEE.
+
+Gillet, O., & Richard, G. (2006, October). ENST-Drums: an extensive audio-visual database for drum signals processing. In ISMIR (pp. 156-159).
+
+Gillet, O., & Richard, G. (2007). Supervised and Unsupervised Sequence Modelling for Drum Transcription. In ISMIR (pp. 219-224).
+
+Moreau, A., & Flexer, A. (2007, September). Drum Transcription in Polyphonic Music Using Non-Negative Matrix Factorisation. In ISMIR (pp. 353-354).
+
+Paulus, J., & Klapuri, A. (2007, September). Combining Temporal and Spectral Features in HMM-Based Drum Transcription. In ISMIR (pp. 225-228).
+
+Gillet, O., & Richard, G. (2008). Transcription and separation of drum signals from polyphonic music. Audio, Speech, and Language Processing, IEEE Transactions on, 16(3), 529-540.
+
+Yoshii, K., Goto, M., & Okuno, H. G. (2005). Adamast: A drum sound recognizer based on adaptation and matching of spectrogram templates. 1st Annual Music Information Retrieval Evaluation eXchange (MIREX).
+
+Yoshii, K., Goto, M., & Okuno, H. G. (2007). Drum sound recognition for polyphonic audio signals by adaptation and matching of spectrogram templates with harmonic structure suppression. Audio, Speech, and Language Processing, IEEE Transactions on, 15(1), 333-345.
+
+Fitzgerald, D., Cranitch, M., & Coyle, E. (2009). Using tensor factorisation models to separate drums from polyphonic music.
+
+Paulus, J., & Klapuri, A. (2009). Drum sound detection in polyphonic music with hidden Markov models. EURASIP Journal on Audio, Speech, and Music Processing, 2009, 14.
+
+Kim, M., Yoo, J., Kang, K., & Choi, S. (2010, March). Blind rhythmic source separation: nonnegativity and repeatability. In Acoustics Speech and Signal Processing (ICASSP), 2010 IEEE International Conference on (pp. 2006-2009). IEEE.
+
+Spich, A., Zanoni, M., Sarti, A., & Tubaro, S. (2010). Drum music transcription using prior subspace analysis and pattern recognition. In Proc. 13th Int. Conf. Digital Audio Effects (DAFx-10) (pp. 233-237).
+
+Rigaud, F., Lagrange, M., Robel, A., & Peeters, G. (2011, May). Drum extraction from polyphonic music based on a spectro-temporal model of percussive sounds. In Acoustics, Speech and Signal Processing (ICASSP), 2011 IEEE International Conference on (pp. 381-384). IEEE.
+
+Kim, M., Yoo, J., Kang, K., & Choi, S. (2011). Nonnegative matrix partial co-factorization for spectral and temporal drum source separation. Selected Topics in Signal Processing, IEEE Journal of, 5(6), 1192-1204.
+
+Battenberg, E., Huang, V., & Wessel, D. (2012, March). Toward live drum separation using probabilistic spectral clustering based on the itakura-saito divergence. In Audio Engineering Society Conference: 45th International Conference: Applications of Time-Frequency Processing in Audio. Audio Engineering Society.
