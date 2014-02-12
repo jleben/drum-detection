@@ -74,3 +74,27 @@ Kim, M., Yoo, J., Kang, K., & Choi, S. (2011). Nonnegative matrix partial co-fac
 Battenberg, E., Huang, V., & Wessel, D. (2012, March). Toward live drum separation using probabilistic spectral clustering based on the itakura-saito divergence. In Audio Engineering Society Conference: 45th International Conference: Applications of Time-Frequency Processing in Audio. Audio Engineering Society.
 
 Hochenbaum, J., & Kapur, A. (2012). Drum Stroke Computing: Multimodal Signal Processing for Drum Stroke Identification and Performance Metrics. In International Conference on New Interfaces for Musical Expression.
+
+------
+
+Davies, M., Degara, N., Plumbley, M. (2009, October). Evaluation Methods for Musical Audio Beat Tracking Algorithms. Queen Mary, University of London.
+
+Bock, S., Arzt, A., Krebs, F., Schedl, M. (2012, September). Online Real-Time Onset Detection with Recurrent Neural Networks. Proc. of the 15th Int. Converence on Digital Audio Effects (DAFx-12), York, UK.
+
+Grosche, P., Muller, M., Sapp, C. (2010). What Makes Beat Tracking Difficult? A Case Study on Chopin Mazurkas. 11th International Society for Music Information Retrieval Conference (ISMIR 2010).
+
+Turetsky, R., Ellis, D. (2003). Ground-Truth Transcriptions of Real Music from Force-Aligned MIDI Syntheses. Columbia University, NY.
+
+Turnbull, D., Liu, R., Barrington, L., Lanckriet, G. (2007). A Game-based Approach for Collecting Semantic Annotations of Music. Unversity of California, San Diego.
+
+Wohrer, A. (2009). Unpitched Percussion Transcriptin in Audio Signals. Universitat, Wien.
+
+Gillet. O., Richard, G. (2006). ENST-Drums: an extensive audio-visual database for drum signals processing. Paris, France.
+
+Goto, M. (2006). AIST Annotation for the RWC Music Database. National Institute of Advanced Industrial Science and Technology (AIST). Japan.
+
+Tanghe, K., Lesaffre, M., Degroeve, S., Leman, M., De Baets, B., Martens, J. (2005). Collecting Ground Truth Annotations fro Drum Detection in Polyphonic Music. Department of Musicology, Ghent University, Belgium.
+
+
+
+
