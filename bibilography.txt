@@ -51,8 +51,6 @@ Gillet, O., & Richard, G. (2006, October). ENST-Drums: an extensive audio-visual
 
 Gillet, O., & Richard, G. (2007). Supervised and Unsupervised Sequence Modelling for Drum Transcription. In ISMIR (pp. 219-224).
 
-Moreau, A., & Flexer, A. (2007, September). Drum Transcription in Polyphonic Music Using Non-Negative Matrix Factorisation. In ISMIR (pp. 353-354).
-
 Paulus, J., & Klapuri, A. (2007, September). Combining Temporal and Spectral Features in HMM-Based Drum Transcription. In ISMIR (pp. 225-228).
 
 Yoshii, K., Goto, M., & Okuno, H. G. (2007). Drum sound recognition for polyphonic audio signals by adaptation and matching of spectrogram templates with harmonic structure suppression. Audio, Speech, and Language Processing, IEEE Transactions on, 15(1), 333-345.
