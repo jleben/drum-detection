@@ -45,6 +45,8 @@ Gillet, O., & Richard, G. (2005, October). Extraction and remixing of drum track
 
 Tzanetakis, G., Kapur, A., & Mcwalter, R. I. (2005, October). Subband-based Drum Transcription for Audio Signals. In Multimedia Signal Processing, 2005 IEEE 7th Workshop on (pp. 1-4). IEEE.
 
+Dixon, S. (2006, September). Onset detection revisited. In Proceedings of the 9th International Conference on Digital Audio Effects (Vol. 120, pp. 133-137).
+
 Paulus, J. (2006, May). Acoustic modelling of drum sounds with hidden Markov models for music transcription. In Acoustics, Speech and Signal Processing, 2006. ICASSP 2006 Proceedings. 2006 IEEE International Conference on (Vol. 5, pp. V-V). IEEE.
 
 Gillet, O., & Richard, G. (2006, October). ENST-Drums: an extensive audio-visual database for drum signals processing. In ISMIR (pp. 156-159).
