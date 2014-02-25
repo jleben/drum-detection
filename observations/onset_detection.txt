@@ -1,0 +1,3 @@
+- drum onset effect is sometimes spilled across more than one onset function sample
+- kick drum badly detected - prbly due to lower bin resolution at low freq
+- plosive voice sounds are very prominent
