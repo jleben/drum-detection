@@ -1,0 +1,9 @@
+Series {
+  + (public) threshold = 0.5
+
+  -> ShiftInput { winSize = (2 * /inSamples) } -> Windowing
+
+  -> Spectrum -> PowerSpectrum
+
+  -> DeltaRatio -> Threshold { threshold = /threshold }
+}
