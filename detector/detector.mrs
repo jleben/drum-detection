@@ -1,0 +1,26 @@
+Series {
+  + (public) input = ""
+  + (public) output = ""
+  + (public) threshold = 0.5
+  + (public) win_size = 1024
+  + (public) hop_size = 512
+
+  + done = (sndfile/hasData == false)
+
+  inSamples = hop_size
+
+  -> sndfile: SoundFileSource { filename = /input }
+
+  -> ShiftInput { winSize = /win_size } -> Windowing
+
+  -> Spectrum -> PowerSpectrum
+
+  -> DeltaRatio -> Threshold { threshold = /threshold }
+
+  -> PlotSink {
+      filename = /output
+      sequence = false
+      single_file = true
+      no_ticks = true
+  }
+}
