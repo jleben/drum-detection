@@ -1,0 +1,11 @@
+Series {
+  + (public) threshold = 0.5
+
+  + done = (sndfile/hasData == false)
+
+  -> ShiftInput { winSize = (2 * /inSamples) } -> Windowing
+
+  -> Spectrum -> PowerSpectrum
+
+  -> DeltaRatio -> Threshold { threshold = /threshold }
+}

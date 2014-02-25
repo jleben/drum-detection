@@ -11,4 +11,9 @@ target_link_libraries(detector marsyas)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/detector.mrs detector.mrs COPYONLY)
 
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/detector.mrs DESTINATION .)
+#install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/detector.mrs DESTINATION .)
+
+install(
+  FILES ${CMAKE_CURRENT_SOURCE_DIR}/detector_core.mrs
+  DESTINATION "/home/jakob/.config/marsyas/scripts"
+)
