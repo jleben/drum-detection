@@ -3,6 +3,7 @@
 
 #include <vamp-sdk/Plugin.h>
 #include <marsyas/system/MarSystem.h>
+#include <map>
 
 namespace Marsyas {
 
@@ -10,7 +11,7 @@ class VampPlugin : public Vamp::Plugin
 {
 
 public:
-    VampPlugin(const std::string & script, float inputSampleRate);
+    VampPlugin(const std::string & script, MarSystem *prototype, float inputSampleRate);
     virtual ~VampPlugin();
 
     bool initialise(size_t channels, size_t stepSize, size_t blockSize);
@@ -23,8 +24,6 @@ public:
     std::string getCopyright() const;
     int getPluginVersion() const;
 
-    //ParameterList getParameterDescriptors() const;
-
     InputDomain getInputDomain() const;
     size_t getMinChannelCount() const;
     size_t getMaxChannelCount() const;
@@ -33,8 +32,9 @@ public:
 
     OutputList getOutputDescriptors() const;
 
-    //float getParameter(std::string) const;
-    //void setParameter(std::string, float);
+    ParameterList getParameterDescriptors() const;
+    float getParameter(std::string) const;
+    void setParameter(std::string, float);
 
     FeatureSet process(const float *const *inputBuffers,
                        Vamp::RealTime timestamp);
@@ -42,7 +42,14 @@ public:
     FeatureSet getRemainingFeatures();
 
 private:
+    void discoverParameters();
+    void applyParameters(MarSystem *system);
+
     std::string m_script_filename;
+    MarSystem * m_prototype;
+
+    ParameterList m_param_descriptors;
+    std::map<std::string, float> m_params;
     float m_input_sample_rate;
     size_t m_channels;
     size_t m_block_size;

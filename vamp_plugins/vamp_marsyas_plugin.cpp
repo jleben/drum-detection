@@ -37,25 +37,83 @@ static MarSystemManager *get_marsystem_manager()
 class VampPluginAdapter: public Vamp::PluginAdapterBase
 {
   string m_script;
+  MarSystem *m_prototype;
+
 public:
-  VampPluginAdapter(const string & script): m_script(script) {}
+  VampPluginAdapter(const string & script): m_script(script)
+  {
+    m_prototype = system_from_script(m_script, get_marsystem_manager());
+    if (!m_prototype)
+    {
+      cerr << "ERROR: Failed to create prototype for script: " << m_script << endl;
+    }
+  }
+
+  ~VampPluginAdapter()
+  {
+    delete m_prototype;
+  }
 
 private:
   virtual Vamp::Plugin * createPlugin (float inputSampleRate)
   {
-    return new Marsyas::VampPlugin(m_script, inputSampleRate);
+    return new Marsyas::VampPlugin(m_script, m_prototype, inputSampleRate);
   }
 };
 
-VampPlugin::VampPlugin(const string & script, float inputSampleRate):
+VampPlugin::VampPlugin(const string & script, MarSystem * prototype, float inputSampleRate):
     Vamp::Plugin(inputSampleRate),
     m_script_filename(script),
+    m_prototype(prototype),
     m_input_sample_rate(inputSampleRate),
     m_channels(0),
     m_block_size(0),
     m_step_size(0),
     m_system(0)
 {
+  discoverParameters();
+}
+
+void VampPlugin::discoverParameters()
+{
+  if (!m_prototype)
+  {
+    cerr << "WARNING: Missing prototype!" << endl;
+    return;
+  }
+
+  const std::map<std::string, MarControlPtr> & controls = m_prototype->controls();
+  std::map<std::string, MarControlPtr>::const_iterator it;
+  for (it = controls.begin(); it != controls.end(); ++it)
+  {
+    const MarControlPtr & control = it->second;
+
+    if (!control->isPublic())
+      continue;
+
+    ParameterDescriptor param;
+    if (control->hasType<mrs_real>())
+    {
+      param.defaultValue = (float) control->to<mrs_real>();
+    }
+    else if (control->hasType<mrs_natural>())
+    {
+      param.isQuantized = true;
+      param.quantizeStep = 1.0f;
+      param.defaultValue = (float) control->to<mrs_natural>();
+    }
+    else
+    {
+      continue;
+    }
+    param.identifier = param.name = control->id();
+    param.minValue = -10000.f;
+    param.maxValue = 10000.f;
+
+    m_param_descriptors.push_back(param);
+
+    m_params[param.identifier] = param.defaultValue;
+  }
 }
 
 VampPlugin::~VampPlugin()
@@ -122,6 +180,51 @@ size_t VampPlugin::getPreferredStepSize() const
     return 0;
 }
 
+VampPlugin::ParameterList VampPlugin::getParameterDescriptors() const
+{
+  return m_param_descriptors;
+}
+
+float VampPlugin::getParameter(std::string id) const
+{
+  map<string, float>::const_iterator it = m_params.find(id);
+  if (it == m_params.end())
+  {
+    cerr << "Invalid parameter id: " << id << endl;
+    return 0.f;
+  }
+
+  return it->second;
+}
+
+void VampPlugin::setParameter(std::string id, float value)
+{
+  m_params[id] = value;
+}
+
+Vamp::Plugin::OutputList VampPlugin::getOutputDescriptors() const
+{
+    OutputList outputs;
+
+    OutputDescriptor out;
+    out.identifier = "output";
+    out.name = "Output";
+    out.sampleType = OutputDescriptor::FixedSampleRate;
+    out.hasFixedBinCount = true;
+    if (m_system)
+    {
+      mrs_natural in_rate = m_system->getControl("mrs_natural/inSamples")->to<mrs_natural>();
+      mrs_natural out_rate = m_system->getControl("mrs_natural/onSamples")->to<mrs_natural>();
+      float input_output_rate_ratio = (float) out_rate / (float) in_rate;
+      out.sampleRate = m_input_sample_rate * input_output_rate_ratio;
+      out.binCount = m_system->getControl("mrs_natural/onObservations")->to<mrs_natural>();
+    }
+
+    outputs.push_back(out);
+
+    return outputs;
+}
+
 bool VampPlugin::initialise(size_t channels, size_t stepSize, size_t blockSize)
 {
   delete m_system;
@@ -146,6 +249,8 @@ bool VampPlugin::initialise(size_t channels, size_t stepSize, size_t blockSize)
   m_system->updControl("mrs_natural/inObservations", (mrs_natural) channels);
   m_system->updControl("mrs_natural/inSamples", (mrs_natural) blockSize);
 
+  applyParameters(m_system);
+
   mrs_natural m_out_observations = m_system->getControl("mrs_natural/onObservations")->to<mrs_natural>();
   mrs_natural m_out_samples = m_system->getControl("mrs_natural/onSamples")->to<mrs_natural>();
 
@@ -161,32 +266,40 @@ bool VampPlugin::initialise(size_t channels, size_t stepSize, size_t blockSize)
   return true;
 }
 
+void VampPlugin::applyParameters(MarSystem *system)
+{
+  map<string, float>::const_iterator it;
+  for (it = m_params.begin(); it != m_params.end(); ++it)
+  {
+    const string & id = it->first;
+    float value = it->second;
+
+    MarControlPtr control = system->control(id);
+
+    if (control.isInvalid())
+    {
+      cerr << "Invalid parameter id: " << id << endl;
+      continue;
+    }
+
+    if (control->hasType<mrs_real>())
+    {
+      control->setValue((mrs_real) value);
+    }
+    else if (control->hasType<mrs_natural>())
+    {
+      control->setValue((mrs_natural) value);
+    }
+    else
+    {
+      cerr << "Invalid type for parameter id: " << id << endl;
+    }
+  }
+}
+
 void VampPlugin::reset()
 {
   initialise(m_channels, m_step_size, m_block_size);
-}
-
-Vamp::Plugin::OutputList VampPlugin::getOutputDescriptors() const
-{
-    OutputList outputs;
-
-    OutputDescriptor out;
-    out.identifier = "output";
-    out.name = "Output";
-    out.sampleType = OutputDescriptor::FixedSampleRate;
-    out.hasFixedBinCount = true;
-    if (m_system)
-    {
-      mrs_natural in_rate = m_system->getControl("mrs_natural/inSamples")->to<mrs_natural>();
-      mrs_natural out_rate = m_system->getControl("mrs_natural/onSamples")->to<mrs_natural>();
-      float input_output_rate_ratio = (float) out_rate / (float) in_rate;
-      out.sampleRate = m_input_sample_rate * input_output_rate_ratio;
-      out.binCount = m_system->getControl("mrs_natural/onObservations")->to<mrs_natural>();
-    }
-
-    outputs.push_back(out);
-
-    return outputs;
 }
 
 Vamp::Plugin::FeatureSet VampPlugin::process(const float *const *inputBuffers, Vamp::RealTime timeStamp)
