@@ -1,5 +1,6 @@
 Series {
-  + (public) threshold = 0.5
+  + (public) delta_threshold = 0.5
+  + (public) peak_threashold = 1.2
 
   -> ShiftInput { winSize = (2 * /inSamples) } -> Windowing
 
@@ -9,5 +10,8 @@ Series {
 
   -> Memory { memSize = 18 }
 
-  -> PeakerOnset { lookAheadSamples = 4 threshold = 1.2 }
+  -> PeakerOnset {
+    lookAheadSamples = 4
+    threshold = /peak_threashold
+  }
 }
