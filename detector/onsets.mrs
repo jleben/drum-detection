@@ -1,17 +1,18 @@
 Series {
   + (public) delta_threshold = 0.5
-  + (public) peak_threashold = 1.2
+  + (public) peak_threshold = 1.2
 
   -> ShiftInput { winSize = (2 * /inSamples) } -> Windowing
 
   -> Spectrum -> PowerSpectrum
 
-  -> DeltaRatio -> Threshold { threshold = /threshold }
+  -> DeltaRatio -> Threshold { threshold = /delta_threshold }
 
   -> Memory { memSize = 18 }
 
-  -> PeakerOnset {
+  -> PeakerOnset
+  {
     lookAheadSamples = 4
-    threshold = /peak_threashold
+    threshold = /peak_threshold
   }
 }
