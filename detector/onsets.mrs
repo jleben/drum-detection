@@ -1,4 +1,6 @@
 Series {
+  ~ DeltaRatio: "delta_ratio.mrs"
+
   + (public) delta_threshold = 0.5
   + (public) peak_threshold = 1.2
 
@@ -6,7 +8,7 @@ Series {
 
   -> Spectrum -> PowerSpectrum
 
-  -> DeltaRatio -> Threshold { threshold = /delta_threshold }
+  -> DeltaRatio -> Threshold { value = /delta_threshold }
 
   -> Memory { memSize = 18 }
 
