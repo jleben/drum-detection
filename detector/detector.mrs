@@ -34,7 +34,7 @@ Series {
 
     -> Series {
       -> Memory{memSize=3}
-      -> Sum { mode = sum_samples }
+      -> Sum { mode = "sum_observations" }
       -> Centroid  -> Mean -> DelaySamples{delay=2}
     }
   }
