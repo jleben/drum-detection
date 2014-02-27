@@ -32,7 +32,11 @@ Series {
         }
     }
 
-    -> Series { -> Centroid -> Memory{memSize=3} -> Mean -> DelaySamples{delay=2} }
+    -> Series {
+      -> Memory{memSize=3}
+      -> Sum { mode = sum_samples }
+      -> Centroid  -> Mean -> DelaySamples{delay=2}
+    }
   }
 
   -> Gain { gain = 100.0 }
