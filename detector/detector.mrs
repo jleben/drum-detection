@@ -3,10 +3,10 @@ Series {
 
   + (public) input = ""
   + (public) output = ""
-  + (public) win_size = 1024
-  + (public) hop_size = 512
+  + (public) win_size = 2048
+  + (public) hop_size = 1024
   + (public) delta_threshold = 0.5
-  + (public) peak_threshold = 1.2
+  + (public) peak_threshold = 1.3
 
   + done = (sndfile/hasData == false)
 
@@ -35,11 +35,10 @@ Series {
     -> Series {
       -> Memory{memSize=3}
       -> Sum { mode = "sum_observations" }
-      -> Centroid  -> Mean -> DelaySamples{delay=2}
+      -> Centroid
+      -> DelaySamples{delay=2}
     }
   }
-
-  -> Gain { gain = 100.0 }
 
   -> CsvSink { filename = /output separator = ", " }
 }
