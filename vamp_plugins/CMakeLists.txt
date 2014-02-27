@@ -1,8 +1,6 @@
 
 set( sources
   vamp_marsyas_plugin.cpp
-  ${CMAKE_SOURCE_DIR}/detector/delta_ratio.cpp
-  ${CMAKE_SOURCE_DIR}/detector/threshold.cpp
 )
 
 add_library( marsyas_vamp_plugin MODULE ${sources} )

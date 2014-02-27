@@ -1,0 +1,8 @@
+Series
+{
+  -> Memory { memSize = 2 }
+  -> Reverse
+  -> Transposer
+  -> Ratio { mode = "log10" }
+  -> Transposer
+}

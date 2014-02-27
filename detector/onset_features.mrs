@@ -1,18 +1,8 @@
 Series {
   ~ DeltaRatio: "delta_ratio.mrs"
 
-  + (public) input = ""
-  + (public) output = ""
-  + (public) win_size = 1024
-  + (public) hop_size = 512
   + (public) delta_threshold = 0.5
   + (public) peak_threshold = 1.2
-
-  + done = (sndfile/hasData == false)
-
-  inSamples = hop_size
-
-  -> sndfile: SoundFileSource { filename = /input }
 
   -> ShiftInput { winSize = (2 * /inSamples) } -> Windowing
 
@@ -22,9 +12,10 @@ Series {
   {
     -> Series
     {
-        -> DeltaRatio
-        -> Threshold { value = /delta_threshold }
+        -> DeltaRatio -> Threshold { value = /delta_threshold }
+
         -> Memory { memSize = 18 }
+
         -> PeakerOnset
         {
           lookAheadSamples = 4
@@ -34,8 +25,4 @@ Series {
 
     -> Series { -> Centroid -> Memory{memSize=3} -> Mean -> DelaySamples{delay=2} }
   }
-
-  -> Gain { gain = 100.0 }
-
-  -> CsvSink { filename = /output separator = ", " }
 }

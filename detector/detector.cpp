@@ -1,10 +1,8 @@
-#include "delta_ratio.hpp"
-#include "threshold.hpp"
 #include <marsyas/system/MarSystemManager.h>
 #include <marsyas/script/script.h>
+
 #include <iostream>
 
-using namespace drum_detector;
 using namespace Marsyas;
 using namespace std;
 
@@ -19,8 +17,6 @@ int main(int argc, char *argv[])
   char *input_filename = argv[1];
 
   MarSystemManager mng;
-  mng.registerPrototype("Threshold", new Threshold("proto_threshold"));
-  mng.registerPrototype("DeltaRatio", new DeltaRatio("proto_delta_ratio"));
 
   MarSystem *system = system_from_script("detector.mrs", &mng);
   if (!system)

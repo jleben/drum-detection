@@ -1,8 +1,5 @@
 #include "vamp_marsyas_plugin.hpp"
 
-#include "../detector/delta_ratio.hpp"
-#include "../detector/threshold.hpp"
-
 #include <marsyas/system/MarSystemManager.h>
 #include <marsyas/script/script.h>
 
@@ -28,8 +25,6 @@ static MarSystemManager *get_marsystem_manager()
   if (!manager)
   {
     manager = new MarSystemManager;
-    manager->registerPrototype("Threshold", new drum_detector::Threshold("proto_threshold"));
-    manager->registerPrototype("DeltaRatio", new drum_detector::DeltaRatio("proto_delta_ratio"));
   }
   return manager;
 }
