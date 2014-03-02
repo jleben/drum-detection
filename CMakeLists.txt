@@ -4,3 +4,4 @@ project(uvic_mir_drum_detection)
 
 add_subdirectory(detector)
 add_subdirectory(vamp_plugins)
+add_subdirectory(performance)
