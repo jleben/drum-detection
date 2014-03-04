@@ -40,19 +40,17 @@ Midicsv::Midicsv(string name, File::teMode eMode) : File(name, eMode)
 {
     uint32_t uFormat;
     uint32_t uTracks;
-    uint32_t uDivision;
-    uint32_t uTempo;
 
     // Check mode
     if (eModeRead == eMode)
     {
         // Retrive meta data and validate file
-        mbValid  = header(uFormat, uTracks, uDivision);
-        mbValid &= tempo(uTempo);
+        mbValid  = header(uFormat, uTracks, muDivision);
+        mbValid &= tempo(muTempo);
         mbValid &= (scuSupportedFormat == uFormat) ? true : false;
 
         // Compute clock tick period
-        mfTick = (float)((float)uTempo/1000000.0f/(float)uDivision);
+        mfTick = (float)((float)muTempo/1000000.0f/(float)muDivision);
     } else
     {
         // New file
@@ -181,6 +179,16 @@ bool Midicsv::tempo(uint32_t &uValue)
 
     return event(spcEventTempo, uDummy, uDummy, uValue, uDummy, uDummy,
             uDummy);
+}
+
+uint32_t Midicsv::tempo(void)
+{
+    return muTempo;
+}
+
+uint32_t Midicsv::division(void)
+{
+    return muDivision;
 }
 
 // P R I V A T E  M E T H O D S

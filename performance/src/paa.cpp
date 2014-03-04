@@ -223,11 +223,20 @@ bool Paa::run(ostream &out)
     // Resynthesize measurement
     if (mbResynthesis)
     {
+        // Open reference file in order to retrive time division and tempo
+        Midicsv ref(mReference, File::eModeRead);
+        if (!ref.valid())
+        {
+            cerr << "error: unable to open reference" << endl;
+
+            return false;
+        }
+
         // Open file
         Midicsv resynthesis(mResynthesis, File::eModeWrite);
 
-        // TEMP: Write header
-        if (!resynthesis.headerWrite(960, 500000))
+        // Write header
+        if (!resynthesis.headerWrite(ref.division(), ref.tempo()))
         {
             cerr << "error: unable to write resynthesis header" << endl;
 

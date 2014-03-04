@@ -34,13 +34,15 @@ public:
     ~Midicsv();
 
     // Method[s]
-    bool valid();
-    bool eventRead(float &fTimestamp, uint32_t &uType, float &fStrength);
-    bool eventWrite(float fTimestamp, uint32_t uType, float fStrength);
-    bool header(uint32_t &uFormat, uint32_t &uTracks, uint32_t &uDivision);
-    bool headerWrite(uint32_t uDivision, uint32_t uTempo);
-    bool footerWrite(float fTimestamp);
-    bool tempo(uint32_t &uValue);
+    bool     valid();
+    bool     eventRead(float &fTimestamp, uint32_t &uType, float &fStrength);
+    bool     eventWrite(float fTimestamp, uint32_t uType, float fStrength);
+    bool     header(uint32_t &uFormat, uint32_t &uTracks, uint32_t &uDivision);
+    bool     headerWrite(uint32_t uDivision, uint32_t uTempo);
+    bool     footerWrite(float fTimestamp);
+    bool     tempo(uint32_t &uValue);
+    uint32_t tempo(void);
+    uint32_t division(void);
 
 private:
 
