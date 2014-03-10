@@ -1,3 +1,7 @@
+if(NOT MARSYAS_FOUND)
+  message(STATUS "Not building detection app. (Marsyas not found.)")
+  return()
+endif()
 
 set(sources
   detector.cpp
@@ -5,7 +9,8 @@ set(sources
 
 add_executable(detector ${sources})
 
-target_link_libraries(detector marsyas)
+include_directories(${MARSYAS_INCLUDE_DIR})
+target_link_libraries(detector ${MARSYAS_LIB})
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/detector.mrs detector.mrs COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/delta_ratio.mrs delta_ratio.mrs COPYONLY)
