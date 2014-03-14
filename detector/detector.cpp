@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
   }
 
   input_control->setValue(string(input_filename));
-  output_control->setValue(string("features.out"));
+  //output_control->setValue(string("features.out"));
 
   mrs_real sample_rate = system->remoteControl("sndfile/osrate")->to<mrs_real>();
   mrs_natural block_size = system->remoteControl("sndfile/onSamples")->to<mrs_natural>();
