@@ -1,5 +1,8 @@
+#include "scripts.hpp"
+
 #include <marsyas/system/MarSystemManager.h>
 #include <marsyas/script/script.h>
+#include <marsyas/script/manager.hpp>
 
 #include <iostream>
 #include <fstream>
@@ -16,17 +19,19 @@ struct onset
 
 int main(int argc, char *argv[])
 {
-  if (argc < 2)
+  if (argc < 3)
   {
-    cerr << "Missing argument: input file" << endl;
+    cerr << "Usage: <input file> <output file>" << endl;
     return 1;
   }
 
   char *input_filename = argv[1];
+  char *output_filename = argv[2];
 
-  MarSystemManager mng;
+  detector::registerScripts();
 
-  MarSystem *system = system_from_script("detector.mrs", &mng);
+  ScriptTranslator translator;
+  MarSystem *system = translator.translateRegistered("detector.mrs");
   if (!system)
   {
     cerr << "Failure loading script!" << endl;
@@ -91,11 +96,10 @@ int main(int argc, char *argv[])
 
   string separator(",");
 
-  const char * out_filename = "onsets.out";
-  ofstream out_file(out_filename);
+  ofstream out_file(output_filename);
   if (!out_file.is_open())
   {
-    cerr << "Failed to open output file for writing: " << out_filename << endl;
+    cerr << "Failed to open output file for writing: " << output_filename << endl;
     return 1;
   }
 
@@ -106,5 +110,8 @@ int main(int argc, char *argv[])
              << onsets[i].strength
              << endl;
   }
+
+  cout << "Done." << endl;
+
   return 0;
 }
