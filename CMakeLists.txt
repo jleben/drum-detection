@@ -6,8 +6,15 @@ project(uvic_mir_drum_detection)
 
 find_library(MARSYAS_LIB "marsyas")
 find_path(MARSYAS_INCLUDE_DIR "marsyas/realvec.h")
-if(MARSYAS_LIB AND MARSYAS_INCLUDE_DIR)
+find_program(MARSYAS_SCRIPT_CPP marsyas-script-cpp)
+if(MARSYAS_LIB AND MARSYAS_INCLUDE_DIR AND MARSYAS_SCRIPT_CPP)
   set(MARSYAS_FOUND TRUE)
+else()
+  foreach(component MARSYAS_LIB MARSYAS_INCLUDE_DIR MARSYAS_SCRIPT_CPP)
+    if(NOT ${component})
+      message(STATUS "${component} not found.")
+    endif()
+  endforeach()
 endif()
 
 # Find Vamp SDK
