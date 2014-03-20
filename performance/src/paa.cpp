@@ -20,6 +20,7 @@ using namespace std;
 #include <fstream>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <float.h>
 
 // P R O J E C T  I N C L U D E S
@@ -44,11 +45,11 @@ Paa::Paa(int argc, char *argv[]) : App(argc, argv)
 {
     // Set defaults
     mbVerbose           = false;
-    mbConfusion         = false;
+    mbListing           = false;
     mbMap               = false;
     mfOnsetTolerance    = cfOnsetTolerance;
     mfDynamicTolerance  = cfDynamicTolerance;
-    mConfusion          = "";
+    mListing            = "";
     muOnsetMatch        = 0;
     muTypeMatch         = 0; 
     muDynamicMatch      = 0;
@@ -61,9 +62,11 @@ Paa::~Paa()
 bool Paa::run(ostream &out)
 {
     uint32_t         uIndex;
-    float            fUpper;
-    float            fLower;
-    float            fOnsetAccuracy;
+    float            fOnsetUpper;
+    float            fOnsetLower;
+	float            fDynamicUpper;
+	float            fDynamicLower;
+	float            fOnsetAccuracy;
     float            fTypeAccuracy;
     float            fDynamicAccuracy;
     vector<trEvent>  reference;
@@ -80,7 +83,7 @@ bool Paa::run(ostream &out)
 
     // Parse option[s]
     mbVerbose = option(cOptionVerbose);
-    mbConfusion = option(cOptionConfusion, mConfusion);
+    mbListing = option(cOptionListing, mListing);
     mbMap = option(cOptionMap, mMap);
     mbResynthesis = option(cOptionResynthesis, mResynthesis);
     option(cOptionOnsetTolerance, mfOnsetTolerance);
@@ -108,6 +111,12 @@ bool Paa::run(ostream &out)
         return false;
     }
 
+	// Check verbosity
+	if (mbVerbose)
+	{
+		cout << "map entries: " << map.size() << endl;
+	}
+
     // Acquire events
     if (!acquireEvents(mReference, reference, map) || 
         !acquireEvents(mMeasure, measure, map))
@@ -117,57 +126,87 @@ bool Paa::run(ostream &out)
         return false;
     }
 
+	// Check verbosity
+	if (mbVerbose)
+	{
+		cout << "reference events: " << reference.size() << endl;
+		cout << "measure events: " << measure.size() << endl;
+	}
+
     // Analyze event vectors
     for (uint32_t uEvent = 0; uEvent < reference.size(); uEvent++)
     {
         // Derive onset range
         range(reference.at(uEvent).fTimestamp, mfOnsetTolerance/1000.0f, 
-            cfOnsetUpperLimit, cfOnsetLowerLimit, fUpper, fLower);
+            cfOnsetUpperLimit, cfOnsetLowerLimit, fOnsetUpper, fOnsetLower);
 
         // Iterate over measurements
         for (uIndex = 0; uIndex < measure.size(); uIndex++)
         {
-            // Check for existing match
-            if (!measure.at(uIndex).bMatch)
+            // Check for onset fit
+            if ((measure.at(uIndex).fTimestamp >= fOnsetLower) && 
+                (measure.at(uIndex).fTimestamp <= fOnsetUpper))
             {
-                // Check for onset fit
-                if ((measure.at(uIndex).fTimestamp >= fLower) && 
-                    (measure.at(uIndex).fTimestamp <= fUpper))
-                {
-                    // Set reference and measurement
-                    reference.at(uEvent).bMatch     = true;
-                    reference.at(uEvent).uReference = uIndex;
-                    measure.at(uIndex).bMatch       = true;
-                    measure.at(uIndex).uReference   = uEvent;
+				// Check for previous match
+				if (!measure.at(uIndex).bMatch)
+				{
+					// Set reference and measurement
+					reference.at(uEvent).bMatch     = true;
+					reference.at(uEvent).uReference = uIndex;
+					measure.at(uIndex).bMatch       = true;
+					measure.at(uIndex).uReference   = uEvent;
 
-                    // Update match counter
-                    muOnsetMatch++;
+					// Update match counter
+					muOnsetMatch++;
 
-                    // Check for type match
-                    if (reference.at(uEvent).uType == measure.at(uIndex).uType)
-                    {
-                        muTypeMatch++;
-                    }
+					// Check for type match
+					if (reference.at(uEvent).uType == measure.at(uIndex).uType)
+					{
+						muTypeMatch++;
+					}
 
-                    // Derive dynamic range
-                    range(reference.at(uEvent).fStrength, 
-                        mfDynamicTolerance/100.0f, cfDynamicUpperLimit,
-                        cfDynamicLowerLimit, fUpper, fLower);
-                    
-                    // Check for dynamic fit
-                    if ((measure.at(uIndex).fStrength >= fLower) && 
-                        (measure.at(uIndex).fStrength <= fUpper))
-                    {
-                        muDynamicMatch++;
-                    }
+					// Derive dynamic range
+					range(reference.at(uEvent).fStrength,
+						reference.at(uEvent).fStrength*(mfDynamicTolerance/100.0f), 
+						cfDynamicUpperLimit, cfDynamicLowerLimit, 
+						fDynamicUpper, fDynamicLower);
 
-                    break;
-                }
-            }
+					// Check for dynamic fit
+					if ((measure.at(uIndex).fStrength >= fDynamicLower) &&
+						(measure.at(uIndex).fStrength <= fDynamicUpper))
+					{
+						muDynamicMatch++;
+					}
+				} else
+				{
+					// Check for type match
+					if (reference.at(uEvent).uType == measure.at(uIndex).uType)
+					{
+						// Update reference and measurement
+						reference.at(uEvent).bMatch     = true;
+						reference.at(uEvent).uReference = uIndex;
+						measure.at(uIndex).bMatch       = true;
+						measure.at(uIndex).uReference   = uEvent;
+
+						// Update type counter
+						muTypeMatch++;
+
+						// TODO: Update dynamic range count
+					}
+				}
+			}
         }
     }
 
-    // Compute statistics
+	// Check verbosity
+	if (mbVerbose)
+	{
+		cout << "onset match: " << muOnsetMatch << endl;
+		cout << "type match: " << muTypeMatch << endl;
+		cout << "dynamic match: " << muDynamicMatch << endl;
+	}
+	
+	// Compute statistics
     fOnsetAccuracy = (0 == reference.size()) ? 0 :
                         ((float)muOnsetMatch/(float)reference.size())*100.0f;
     fTypeAccuracy = (0 == muOnsetMatch) ? 0 :
@@ -182,21 +221,24 @@ bool Paa::run(ostream &out)
     out << "type accuracy: " << fTypeAccuracy << "%" << endl;
     out << "dynamic accuracy: " << fDynamicAccuracy << "%" << endl;
 
-    // Write to confusion matrix
-    if (mbConfusion)
+	// Display confusion matrix
+	confusionMatrix(cout, reference, measure, map);
+
+    // Write to listing file
+    if (mbListing)
     {
         // Open file
-        Csv confusion(mConfusion, File::eModeWrite);
+        Csv listing(mListing, File::eModeWrite);
 
-        // Write confusion matrix entries
+        // Write listing entries
         for (uIndex = 0; uIndex < reference.size(); uIndex++)
         {
             // Write reference metrics
-            confusion << reference.at(uIndex).bMatch << ",";
-            confusion << reference.at(uIndex).uReference << ",";
-            confusion << reference.at(uIndex).fTimestamp << ",";
-            confusion << reference.at(uIndex).uType << ",";
-            confusion << reference.at(uIndex).fStrength << ",";
+            listing << reference.at(uIndex).bMatch << ",";
+            listing << reference.at(uIndex).uReference << ",";
+            listing << reference.at(uIndex).fTimestamp << ",";
+            listing << reference.at(uIndex).uType << ",";
+            listing << reference.at(uIndex).fStrength << ",";
 
             // Validate reference limit
             if (reference.at(uIndex).uReference < measure.size())
@@ -206,16 +248,16 @@ bool Paa::run(ostream &out)
                 {
                     uint32_t uReference = reference.at(uIndex).uReference;
 
-                    confusion << measure.at(uReference).fTimestamp << ",";
-                    confusion << measure.at(uReference).uType << ",";
-                    confusion << measure.at(uReference).fStrength << endl;
+                    listing << measure.at(uReference).fTimestamp << ",";
+                    listing << measure.at(uReference).uType << ",";
+                    listing << measure.at(uReference).fStrength << endl;
                 } else
                 {
-                    confusion << "0,0,0" << endl;
+                    listing << "0,0,0" << endl;
                 }
             } else
             {
-                confusion << " " << endl;
+                listing << " " << endl;
             }
         }
     }
@@ -289,7 +331,7 @@ void Paa::usage(ostream &out)
     char buffer[80];
 
     sprintf(buffer, "usage: %s -[%c%c%c%c%c%c%c] <reference> <measure>\n",
-        name().c_str(), cOptionVerbose, cOptionConfusion, cOptionMap,
+        name().c_str(), cOptionVerbose, cOptionListing, cOptionMap,
         cOptionResynthesis, cOptionOnsetTolerance, cOptionDynamicTolerance, 
         cOptionHelp);
     out << buffer;
@@ -297,8 +339,8 @@ void Paa::usage(ostream &out)
     out << buffer;
     sprintf(buffer, " %8c %-16s %-32s\n", cOptionVerbose, "", "verbose");
     out << buffer;
-    sprintf(buffer, " %8c %-16s %-32s\n", cOptionConfusion, "<filename>", 
-        "comma seperated confusion output file");
+    sprintf(buffer, " %8c %-16s %-32s\n", cOptionListing, "<filename>", 
+        "comma seperated listing output file");
     out << buffer;
     sprintf(buffer, " %8c %-16s %-32s\n", cOptionMap, "<filename>", 
         "comma seperated type map input file");
@@ -321,7 +363,7 @@ void Paa::dump(ostream &out)
 {
     out << "onset tolerance: " << mfOnsetTolerance << "ms" << endl;
     out << "dynamics tolerance: " << mfDynamicTolerance << "%" << endl;
-    out << "confusion: " << ((mbConfusion) ? mConfusion: "none") << endl;
+    out << "listing: " << ((mbListing) ? mListing: "none") << endl;
     out << "map: " << ((mbMap) ? mMap: "none") << endl;
     out << "resynthesis: " << ((mbResynthesis) ? mResynthesis: "none") << endl;
     out << "reference: " << mReference << endl;
@@ -406,9 +448,65 @@ bool Paa::acquireEvents(string name, vector<trEvent> &onset, vector<trMap> map)
 void Paa::range(float fValue, float fTolerance, float fUpperLimit,
                float fLowerLimit, float &fUpper, float &fLower)
 {
-    float fMargin;
+    fLower  = ((fValue-fTolerance) < fLowerLimit) ? fLowerLimit : fValue-fTolerance;
+	fUpper = ((fValue + fTolerance) > fUpperLimit) ? fUpperLimit : fValue + fTolerance;
+}
 
-    fMargin = fValue * fTolerance;
-    fLower  = ((fValue-fMargin) < fLowerLimit) ? fLowerLimit : fValue-fMargin;
-    fUpper  = ((fValue+fMargin) > fUpperLimit) ? fUpperLimit : fValue+fMargin;
+void Paa::confusionMatrix(ostream &out, vector<trEvent> &reference, vector<trEvent> &measure, vector<trMap> &map)
+{
+	char							buffer[80];
+	typedef vector<uint32_t>		typeContainer;
+	typedef typeContainer::iterator typeIterator;
+	typeContainer					type;
+
+	// Build type vector
+	for (uint32_t uIndex = 0; uIndex < map.size(); uIndex++)
+	{
+		typeIterator i = find(type.begin(), type.end(), map.at(uIndex).uOut);
+		if (i == type.end())
+		{
+			type.push_back(map.at(uIndex).uOut);
+		}
+	}
+
+	// Display header
+	cout << "confusion matrix" << endl;
+	cout << "      ";
+	for (uint32_t uIndex = 0; uIndex < type.size(); uIndex++)
+	{
+		sprintf(buffer, "%-6d", type.at(uIndex));
+		cout << buffer;
+	}
+
+	// Iterate over rows
+	for (uint32_t uRow = 0; uRow < type.size(); uRow++)
+	{
+		// Display row type
+		sprintf(buffer, "%-6d", type.at(uRow));
+		cout << endl << buffer;
+
+		// Iterate over columns
+		for (uint32_t uColumn = 0; uColumn < type.size(); uColumn++)
+		{
+			// Count the number of events per type
+			uint32_t uCount = 0;
+			for (uint32_t uEvent = 0; uEvent < reference.size(); uEvent++)
+			{
+				if (reference.at(uEvent).bMatch)
+				{
+					uint32_t uReference = reference.at(uEvent).uReference;
+					if ((reference.at(uEvent).uType == type.at(uRow)) &&
+						(measure.at(uReference).uType == type.at(uColumn)))
+					{
+						uCount++;
+					}
+				}
+			}
+
+			// Display row entry
+			sprintf(buffer, "%-6d", uCount);
+			cout << buffer;
+		}
+	}
+	cout << endl;
 }

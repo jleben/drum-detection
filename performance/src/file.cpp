@@ -55,7 +55,9 @@ bool File::valid()
 
 bool File::lineGet(string &line)
 {
-    return (NULL == getline(mFile, line)) ? false : true;
+	getline(mFile, line);
+
+    return (line.length() > 0) ? true : false;
 }
 
 void File::linePut(string line)

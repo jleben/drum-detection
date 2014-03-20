@@ -18,7 +18,7 @@ class Paa : public App
 public:
 
     // Constant[s]
-    static char  const cOptionConfusion        = 'c';
+    static char  const cOptionListing          = 'l';
     static char  const cOptionDynamicTolerance = 'd';
     static char  const cOptionHelp             = 'h';
     static char  const cOptionMap              = 'm';
@@ -67,10 +67,11 @@ private:
     bool acquireEvents(string name, vector<trEvent> &onset, vector<trMap> map);
     void range(float fValue, float fTolerance, float fUpperLimit,
                float fLowerLimit, float &fUpper, float &fLower);
+	void confusionMatrix(ostream &out, vector<trEvent> &reference, vector<trEvent> &measure, vector<trMap> &map);
 
     // Data
     bool     mbVerbose;
-    bool     mbConfusion;
+    bool     mbListing;
     bool     mbMap;
     bool     mbResynthesis;
     float    mfOnsetTolerance;
@@ -78,7 +79,7 @@ private:
     uint32_t muOnsetMatch;
     uint32_t muDynamicMatch;
     uint32_t muTypeMatch;
-    string   mConfusion;
+    string   mListing;
     string   mReference;
     string   mMeasure;
     string   mMap;
