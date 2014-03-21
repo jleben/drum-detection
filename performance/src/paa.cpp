@@ -182,6 +182,11 @@ bool Paa::run(ostream &out)
 					// Check for type match
 					if (reference.at(uEvent).uType == measure.at(uIndex).uType)
 					{
+						// Clear previous match
+						uint32_t uReference = measure.at(uIndex).uReference;
+						reference.at(uReference).bMatch     = false;
+						reference.at(uReference).uReference = 0;
+
 						// Update reference and measurement
 						reference.at(uEvent).bMatch     = true;
 						reference.at(uEvent).uReference = uIndex;
@@ -471,18 +476,21 @@ void Paa::confusionMatrix(ostream &out, vector<trEvent> &reference, vector<trEve
 
 	// Display header
 	cout << "confusion matrix" << endl;
-	cout << "      ";
+	sprintf(buffer, "%-8s", "ref\\det");
+	cout << buffer;
 	for (uint32_t uIndex = 0; uIndex < type.size(); uIndex++)
 	{
-		sprintf(buffer, "%-6d", type.at(uIndex));
+		sprintf(buffer, "%-8d", type.at(uIndex));
 		cout << buffer;
 	}
+	sprintf(buffer, "%-8s", "miss");
+	cout << buffer;
 
 	// Iterate over rows
 	for (uint32_t uRow = 0; uRow < type.size(); uRow++)
 	{
 		// Display row type
-		sprintf(buffer, "%-6d", type.at(uRow));
+		sprintf(buffer, "%-8d", type.at(uRow));
 		cout << endl << buffer;
 
 		// Iterate over columns
@@ -504,9 +512,25 @@ void Paa::confusionMatrix(ostream &out, vector<trEvent> &reference, vector<trEve
 			}
 
 			// Display row entry
-			sprintf(buffer, "%-6d", uCount);
+			sprintf(buffer, "%-8d", uCount);
 			cout << buffer;
 		}
+
+		// Compute missed event count
+		uint32_t uMissed = 0;
+		for (uint32_t uIndex = 0; uIndex < reference.size(); uIndex++)
+		{
+			if (!reference.at(uIndex).bMatch &&
+				(reference.at(uIndex).uType == type.at(uRow)))
+			{
+				uMissed++;
+			}
+		}
+
+		// Display missed event count
+		sprintf(buffer, "%-8d", uMissed);
+		cout << buffer;
+
 	}
 	cout << endl;
 }
