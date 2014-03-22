@@ -533,4 +533,26 @@ void Paa::confusionMatrix(ostream &out, vector<trEvent> &reference, vector<trEve
 
 	}
 	cout << endl;
+
+	// Display phantom events in measurement
+	sprintf(buffer, "%-8s", "phantom");
+	cout << buffer;
+	for (uint32_t uColumn = 0; uColumn < type.size(); uColumn++)
+	{
+		uint32_t uPhantom = 0;
+
+		// Count the number phantom events
+		for (uint32_t uIndex = 0; uIndex < measure.size(); uIndex++)
+		{
+			if (!measure.at(uIndex).bMatch && (measure.at(uIndex).uType == uColumn))
+			{
+				uPhantom++;
+			}
+		}
+
+		// Display column entry
+		sprintf(buffer, "%-8d", uPhantom);
+		cout << buffer;
+	}
+	cout << endl; 
 }
