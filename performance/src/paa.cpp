@@ -30,6 +30,7 @@ using namespace std;
 #include "file.h"
 #include "midicsv.h"
 #include "csv.h"
+#include "midifile.h"
 #include "map.h"
 
 // I N T I A L I Z A T I O N 
@@ -271,16 +272,22 @@ bool Paa::run(ostream &out)
     if (mbResynthesis)
     {
         // Open reference file in order to retrive time division and tempo
-        Midicsv ref(mReference, File::eModeRead);
-        if (!ref.valid())
-        {
-            cerr << "error: unable to open reference" << endl;
+		Midifile ref(mReference, File::eModeBinaryRead);
+		if (!ref.valid())
+		{
+			cerr << "error: unable to open reference" << endl;
 
-            return false;
-        }
+			return false;
+		}
 
-        // Open file
-        Midicsv resynthesis(mResynthesis, File::eModeWrite);
+		// Open file
+		Midifile resynthesis(mResynthesis, File::eModeBinaryWrite);
+		if (!resynthesis.valid())
+		{
+			cerr << "error: unable to open resynthesis" << endl;
+
+			return false;
+		}
 
         // Write header
         if (!resynthesis.headerWrite(ref.division(), ref.tempo()))
@@ -351,7 +358,7 @@ void Paa::usage(ostream &out)
         "comma seperated type map input file");
     out << buffer;
     sprintf(buffer, " %8c %-16s %-32s\n", cOptionResynthesis, "<filename>", 
-        "comma seperated resynthesis output file");
+        "MIDI format resynthesis output file");
     out << buffer;
     sprintf(buffer, " %8c %-16s %-32s\n", cOptionOnsetTolerance, "<ms>", 
         "onset tolerance");
@@ -362,6 +369,12 @@ void Paa::usage(ostream &out)
     sprintf(buffer, " %8c %-16s %-32s\n", cOptionHelp, "",
         "program help");
     out << buffer;
+	sprintf(buffer, " %8c %-16s %-32s\n", ' ', "reference",
+		"MIDI format reference input file");
+	out << buffer;
+	sprintf(buffer, " %8c %-16s %-32s\n", ' ', "measure",
+		"CSV format detection input file");
+	out << buffer;
 }
 
 void Paa::dump(ostream &out)
@@ -403,16 +416,19 @@ bool Paa::acquireEvents(string name, vector<trEvent> &onset, vector<trMap> map)
     trEvent   rEvent;
 
     // Try to open file using supported format[s]
-    pFile = new Midicsv(name, File::eModeRead);
+    pFile = new Midifile(name, File::eModeBinaryRead);
     if (!pFile->valid())
     {
         delete pFile;
-        pFile = new Csv(name, File::eModeRead);
+        pFile = new Midicsv(name, File::eModeRead);
         if (!pFile->valid())
         {
             delete pFile;
-
-            return false;
+			pFile = new Csv(name, File::eModeRead);
+			if (!pFile->valid())
+			{
+				return false;
+			}
         }
     }
 

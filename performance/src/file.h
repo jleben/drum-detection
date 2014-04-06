@@ -21,7 +21,9 @@ public:
     typedef enum
     {
         eModeRead,
-        eModeWrite
+        eModeWrite,
+		eModeBinaryRead,
+		eModeBinaryWrite
     } teMode;
 
     // Constructor[s]
@@ -34,6 +36,11 @@ public:
     bool lineGet(string &line);
     void linePut(string line);
     void reset();
+	bool read(void *pBuffer, uint32_t uSize);
+	bool write(void *pBuffer, uint32_t uSize);
+	void seek(uint32_t uOffset);
+	bool eof();
+	void unget();
 
     // Virtual Method[s]
     virtual bool valid();

@@ -37,6 +37,14 @@ File::File(string name, teMode eMode) : Object(name)
             mFile.open(name, ios::out);
             break;
 
+		case eModeBinaryRead:
+			mFile.open(name, ios::in | ios::binary);
+			break;
+
+		case eModeBinaryWrite:
+			mFile.open(name, ios::out | ios::binary | ios::trunc);
+			break;
+
         default:
             assert(false);
     }
@@ -69,6 +77,33 @@ void File::reset()
 {
     mFile.clear();
     mFile.seekg(0, ios::beg);
+}
+
+bool File::read(void *pBuffer, uint32_t uSize)
+{
+	return (mFile.read((char*)pBuffer, uSize)) ? true : false;
+}
+
+bool File::write(void *pBuffer, uint32_t uSize)
+{
+	mFile.write((char*)pBuffer, uSize);
+
+	return true;
+}
+
+void File::seek(uint32_t uOffset)
+{
+	mFile.seekg(uOffset, ios::beg);
+}
+
+bool File::eof()
+{
+	return mFile.eof();
+}
+
+void File::unget()
+{
+	mFile.unget();
 }
 
 ostream& File::operator<<(const bool bState)
