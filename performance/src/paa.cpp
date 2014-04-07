@@ -22,6 +22,7 @@ using namespace std;
 #include <vector>
 #include <algorithm>
 #include <float.h>
+#include <stdexcept>
 
 // P R O J E C T  I N C L U D E S
 #include "object.h"
@@ -118,12 +119,23 @@ bool Paa::run(ostream &out)
 		cout << "map entries: " << map.size() << endl;
 	}
 
-    // Acquire events
-    if (!acquireEvents(mReference, reference, map) || 
-        !acquireEvents(mMeasure, measure, map))
+    try {
+        acquireEvents(mReference, reference, map);
+    }
+    catch (std::exception & e)
     {
-        cerr << "error: unable to acquire events" << endl;
+        cerr << "Error: Can not read reference event file: " << mReference << endl;
+        cerr << "Resone: " << e.what() << endl;
+        return false;
+    }
 
+    try {
+        acquireEvents(mMeasure, measure, map);
+    }
+    catch (std::exception & e)
+    {
+        cerr << "Error: Can not read detected event file: " << mMeasure << endl;
+        cerr << "Resone: " << e.what() << endl;
         return false;
     }
 
@@ -409,7 +421,7 @@ bool Paa::acquireMap(string name, vector<trMap> &map)
     return true;
 }
 
-bool Paa::acquireEvents(string name, vector<trEvent> &onset, vector<trMap> map)
+void Paa::acquireEvents(string name, vector<trEvent> &onset, vector<trMap> map)
 {
     uint32_t  uIndex;
     File     *pFile;
@@ -417,19 +429,22 @@ bool Paa::acquireEvents(string name, vector<trEvent> &onset, vector<trMap> map)
 
     // Try to open file using supported format[s]
     pFile = new Midifile(name, File::eModeBinaryRead);
+
     if (!pFile->valid())
     {
         delete pFile;
         pFile = new Midicsv(name, File::eModeRead);
-        if (!pFile->valid())
-        {
-            delete pFile;
-			pFile = new Csv(name, File::eModeRead);
-			if (!pFile->valid())
-			{
-				return false;
-			}
-        }
+    }
+
+    if (!pFile->valid())
+    {
+        delete pFile;
+        pFile = new Csv(name, File::eModeRead);
+    }
+
+    if (!pFile->valid())
+    {
+        throw std::runtime_error("Invalid file format or inexistent file.");
     }
 
     // Read events
@@ -462,8 +477,6 @@ bool Paa::acquireEvents(string name, vector<trEvent> &onset, vector<trMap> map)
 
     // Cleanup
     delete pFile;
-
-    return true;
 }
 
 void Paa::range(float fValue, float fTolerance, float fUpperLimit,

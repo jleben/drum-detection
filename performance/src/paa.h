@@ -64,7 +64,7 @@ private:
 
     // Method[s]
     bool acquireMap(string name, vector<trMap> &map);
-    bool acquireEvents(string name, vector<trEvent> &onset, vector<trMap> map);
+    void acquireEvents(string name, vector<trEvent> &onset, vector<trMap> map);
     void range(float fValue, float fTolerance, float fUpperLimit,
                float fLowerLimit, float &fUpper, float &fLower);
 	void confusionMatrix(ostream &out, vector<trEvent> &reference, vector<trEvent> &measure, vector<trMap> &map);
