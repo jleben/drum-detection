@@ -146,73 +146,78 @@ bool Paa::run(ostream &out)
 		cout << "measure events: " << measure.size() << endl;
 	}
 
-    // Analyze event vectors
-    for (uint32_t uEvent = 0; uEvent < reference.size(); uEvent++)
+    // Match events by time and type
+
+    // Iterate over reference events
+    for (int referenceIndex = 0; referenceIndex < reference.size(); referenceIndex++)
     {
+        trEvent & referenceEvent = reference[referenceIndex];
+
         // Derive onset range
-        range(reference.at(uEvent).fTimestamp, mfOnsetTolerance/1000.0f, 
-            cfOnsetUpperLimit, cfOnsetLowerLimit, fOnsetUpper, fOnsetLower);
+        range(referenceEvent.fTimestamp, mfOnsetTolerance/1000.0f,
+              cfOnsetUpperLimit, cfOnsetLowerLimit, fOnsetUpper, fOnsetLower);
 
-        // Iterate over measurements
-        for (uIndex = 0; uIndex < measure.size(); uIndex++)
+        // Iterate over detected events
+        for (int detectedIndex = 0; detectedIndex < measure.size(); detectedIndex++)
         {
-            // Check for onset fit
-            if ((measure.at(uIndex).fTimestamp >= fOnsetLower) && 
-                (measure.at(uIndex).fTimestamp <= fOnsetUpper))
-            {
-				// Check for previous match
-				if (!measure.at(uIndex).bMatch)
-				{
-					// Set reference and measurement
-					reference.at(uEvent).bMatch     = true;
-					reference.at(uEvent).uReference = uIndex;
-					measure.at(uIndex).bMatch       = true;
-					measure.at(uIndex).uReference   = uEvent;
+            trEvent & detectedEvent = measure[detectedIndex];
 
-					// Update match counter
-					muOnsetMatch++;
+            // Compare time
+            bool time_match =
+                    (detectedEvent.fTimestamp >= fOnsetLower) &&
+                    (detectedEvent.fTimestamp <= fOnsetUpper);
+            if (!time_match)
+                continue;
 
-					// Check for type match
-					if (reference.at(uEvent).uType == measure.at(uIndex).uType)
-					{
-						muTypeMatch++;
-					}
+            // Compare type
+            bool type_match = (referenceEvent.uType == detectedEvent.uType);
 
-					// Derive dynamic range
-					range(reference.at(uEvent).fStrength,
-						reference.at(uEvent).fStrength*(mfDynamicTolerance/100.0f), 
-						cfDynamicUpperLimit, cfDynamicLowerLimit, 
-						fDynamicUpper, fDynamicLower);
+            referenceEvent.bMatch = true;
+            referenceEvent.uReference = detectedIndex;
 
-					// Check for dynamic fit
-					if ((measure.at(uIndex).fStrength >= fDynamicLower) &&
-						(measure.at(uIndex).fStrength <= fDynamicUpper))
-					{
-						muDynamicMatch++;
-					}
-				} else
-				{
-					// Check for type match
-					if (reference.at(uEvent).uType == measure.at(uIndex).uType)
-					{
-						// Clear previous match
-						uint32_t uReference = measure.at(uIndex).uReference;
-						reference.at(uReference).bMatch     = false;
-						reference.at(uReference).uReference = 0;
+            if (type_match)
+                break;
+        }
 
-						// Update reference and measurement
-						reference.at(uEvent).bMatch     = true;
-						reference.at(uEvent).uReference = uIndex;
-						measure.at(uIndex).bMatch       = true;
-						measure.at(uIndex).uReference   = uEvent;
+        // Only update the best matched detected event
+        if (referenceEvent.bMatch)
+        {
+            trEvent & matchingDetectedEvent = measure[referenceEvent.uReference];
+            matchingDetectedEvent.bMatch = true;
+            matchingDetectedEvent.uReference = referenceIndex;
+        }
+    }
 
-						// Update type counter
-						muTypeMatch++;
+    // Count matches.
 
-						// TODO: Update dynamic range count
-					}
-				}
-			}
+    // Iterate over reference events:
+    for (int referenceIndex = 0; referenceIndex < reference.size(); referenceIndex++)
+    {
+        trEvent & referenceEvent = reference[referenceIndex];
+
+        // Check time match
+        if (!referenceEvent.bMatch)
+            continue;
+
+        muOnsetMatch++;
+
+        trEvent & detectedEvent = measure[referenceEvent.uReference];
+
+        // Check type match
+        if (referenceEvent.uType == detectedEvent.uType)
+            muTypeMatch++;
+
+        // Derive dynamic range
+        range(referenceEvent.fStrength,
+              referenceEvent.fStrength*(mfDynamicTolerance/100.0f),
+              cfDynamicUpperLimit, cfDynamicLowerLimit,
+              fDynamicUpper, fDynamicLower);
+
+        // Check strength match
+        if ( (detectedEvent.fStrength >= fDynamicLower) &&
+             (detectedEvent.fStrength <= fDynamicUpper) )
+        {
+            muDynamicMatch++;
         }
     }
 
