@@ -18,6 +18,7 @@ using namespace std;
 #include <cassert>
 #include <iostream>
 #include <fstream>
+#include <iomanip>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -491,102 +492,105 @@ void Paa::range(float fValue, float fTolerance, float fUpperLimit,
 	fUpper = ((fValue + fTolerance) > fUpperLimit) ? fUpperLimit : fValue + fTolerance;
 }
 
+int typeIndex( int type, vector<int> & types )
+{
+    for (int i = 0; i < types.size(); ++i)
+    {
+        if (type == types[i])
+            return i;
+    }
+    return -1;
+}
+
 void Paa::confusionMatrix(ostream &out, vector<trEvent> &reference, vector<trEvent> &measure, vector<trMap> &map)
 {
-	char							buffer[80];
-	typedef vector<uint32_t>		typeContainer;
-	typedef typeContainer::iterator typeIterator;
-	typeContainer					type;
+    vector<int> types;
 
-	// Build type vector
-	for (uint32_t uIndex = 0; uIndex < map.size(); uIndex++)
-	{
-		typeIterator i = find(type.begin(), type.end(), map.at(uIndex).uOut);
-		if (i == type.end())
-		{
-			type.push_back(map.at(uIndex).uOut);
-		}
-	}
+    // Build type vector
+    for (uint32_t uIndex = 0; uIndex < map.size(); uIndex++)
+    {
+        vector<int>::iterator i = find(types.begin(), types.end(), map.at(uIndex).uOut);
+        if (i == types.end())
+        {
+            types.push_back(map.at(uIndex).uOut);
+        }
+    }
 
-	// Display header
-	cout << "confusion matrix" << endl;
-	sprintf(buffer, "%-8s", "ref\\det");
-	cout << buffer;
-	for (uint32_t uIndex = 0; uIndex < type.size(); uIndex++)
-	{
-		sprintf(buffer, "%-8d", type.at(uIndex));
-		cout << buffer;
-	}
-	sprintf(buffer, "%-8s", "miss");
-	cout << buffer;
+    int total_cols = types.size() + 1;
+    int total_rows = types.size() + 2;
 
-	// Iterate over rows
-	for (uint32_t uRow = 0; uRow < type.size(); uRow++)
-	{
-		// Display row type
-		sprintf(buffer, "%-8d", type.at(uRow));
-		cout << endl << buffer;
+    int missed_col = total_cols - 1;
+    int unmapped_row = total_rows - 2;
+    int ghost_row = total_rows - 1;
 
-		// Iterate over columns
-		for (uint32_t uColumn = 0; uColumn < type.size(); uColumn++)
-		{
-			// Count the number of events per type
-			uint32_t uCount = 0;
-			for (uint32_t uEvent = 0; uEvent < reference.size(); uEvent++)
-			{
-				if (reference.at(uEvent).bMatch)
-				{
-					uint32_t uReference = reference.at(uEvent).uReference;
-					if ((reference.at(uEvent).uType == type.at(uRow)) &&
-						(measure.at(uReference).uType == type.at(uColumn)))
-					{
-						uCount++;
-					}
-				}
-			}
+    vector< vector<int> > matrix;
 
-			// Display row entry
-			sprintf(buffer, "%-8d", uCount);
-			cout << buffer;
-		}
+    for (int i = 0; i < total_rows; ++i)
+    {
+        matrix.emplace_back( total_cols, 0 );
+    }
 
-		// Compute missed event count
-		uint32_t uMissed = 0;
-		for (uint32_t uIndex = 0; uIndex < reference.size(); uIndex++)
-		{
-			if (!reference.at(uIndex).bMatch &&
-				(reference.at(uIndex).uType == type.at(uRow)))
-			{
-				uMissed++;
-			}
-		}
+    for (int refIndex = 0; refIndex < reference.size(); ++refIndex)
+    {
+        int row = unmapped_row;
+        int col = missed_col;
 
-		// Display missed event count
-		sprintf(buffer, "%-8d", uMissed);
-		cout << buffer;
+        trEvent & refEvent = reference[refIndex];
+        row = typeIndex(refEvent.uType, types);
 
-	}
-	cout << endl;
+        if (refEvent.bMatch)
+        {
+            trEvent & detectedEvent = measure[refEvent.uReference];
+            col = typeIndex(detectedEvent.uType, types);
+            if (col == -1)
+                col = missed_col;
+        }
 
-	// Display phantom events in measurement
-	sprintf(buffer, "%-8s", "phantom");
-	cout << buffer;
-	for (uint32_t uColumn = 0; uColumn < type.size(); uColumn++)
-	{
-		uint32_t uPhantom = 0;
+        matrix[row][col]++;
+    }
 
-		// Count the number phantom events
-		for (uint32_t uIndex = 0; uIndex < measure.size(); uIndex++)
-		{
-			if (!measure.at(uIndex).bMatch && (measure.at(uIndex).uType == uColumn))
-			{
-				uPhantom++;
-			}
-		}
+    for (int detIndex = 0; detIndex < measure.size(); ++detIndex)
+    {
+        trEvent & detectedEvent = measure[detIndex];
+        if (!detectedEvent.bMatch)
+        {
+            int col = typeIndex(detectedEvent.uType, types);
+            if (col == -1)
+                col = missed_col;
 
-		// Display column entry
-		sprintf(buffer, "%-8d", uPhantom);
-		cout << buffer;
-	}
-	cout << endl; 
+            matrix[ghost_row][col]++;
+        }
+    }
+
+    cout << "confusion matrix:" << endl;
+
+    cout << setw(8) << "ref/det";
+    for (int i = 0; i < types.size(); ++i)
+        cout << setw(8) << types[i];
+    cout << setw(8) << "miss";
+    cout << endl;
+
+    for (int r = 0; r < types.size(); ++r)
+    {
+        cout << setw(8) << types[r];
+        for (int c = 0; c < total_cols; ++c)
+        {
+            cout << setw(8) << matrix[r][c];
+        }
+        cout << endl;
+    }
+
+    cout << setw(8) << "unknown";
+    for (int c = 0; c < total_cols; ++c)
+    {
+        cout << setw(8) << matrix[unmapped_row][c];
+    }
+    cout << endl;
+
+    cout << setw(8) << "ghost";
+    for (int c = 0; c < types.size(); ++c)
+    {
+        cout << setw(8) << matrix[ghost_row][c];
+    }
+    cout << endl;
 }
