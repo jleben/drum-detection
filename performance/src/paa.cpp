@@ -516,9 +516,10 @@ void Paa::confusionMatrix(ostream &out, vector<trEvent> &reference, vector<trEve
         }
     }
 
-    int total_cols = types.size() + 1;
+    int total_cols = types.size() + 2;
     int total_rows = types.size() + 2;
 
+    int unmapped_col = total_cols - 2;
     int missed_col = total_cols - 1;
     int unmapped_row = total_rows - 2;
     int ghost_row = total_rows - 1;
@@ -543,7 +544,7 @@ void Paa::confusionMatrix(ostream &out, vector<trEvent> &reference, vector<trEve
             trEvent & detectedEvent = measure[refEvent.uReference];
             col = typeIndex(detectedEvent.uType, types);
             if (col == -1)
-                col = missed_col;
+                col = unmapped_col;
         }
 
         matrix[row][col]++;
@@ -556,7 +557,7 @@ void Paa::confusionMatrix(ostream &out, vector<trEvent> &reference, vector<trEve
         {
             int col = typeIndex(detectedEvent.uType, types);
             if (col == -1)
-                col = missed_col;
+                col = unmapped_col;
 
             matrix[ghost_row][col]++;
         }
@@ -567,7 +568,8 @@ void Paa::confusionMatrix(ostream &out, vector<trEvent> &reference, vector<trEve
     cout << setw(8) << "ref/det";
     for (int i = 0; i < types.size(); ++i)
         cout << setw(8) << types[i];
-    cout << setw(8) << "miss";
+    cout << setw(8) << "other";
+    cout << setw(8) << "missed";
     cout << endl;
 
     for (int r = 0; r < types.size(); ++r)
@@ -580,7 +582,7 @@ void Paa::confusionMatrix(ostream &out, vector<trEvent> &reference, vector<trEve
         cout << endl;
     }
 
-    cout << setw(8) << "unknown";
+    cout << setw(8) << "other";
     for (int c = 0; c < total_cols; ++c)
     {
         cout << setw(8) << matrix[unmapped_row][c];
@@ -588,7 +590,7 @@ void Paa::confusionMatrix(ostream &out, vector<trEvent> &reference, vector<trEve
     cout << endl;
 
     cout << setw(8) << "ghost";
-    for (int c = 0; c < types.size(); ++c)
+    for (int c = 0; c < (total_cols - 1); ++c)
     {
         cout << setw(8) << matrix[ghost_row][c];
     }
