@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <iostream>
 #include <cmath>
+#include <cassert>
 
 //FIXME: Only on POSIX:
 #include <errno.h>
@@ -82,6 +83,8 @@ void VampPlugin::discoverParameters()
   for (it = controls.begin(); it != controls.end(); ++it)
   {
     const MarControlPtr & control = it->second;
+
+    assert(!control.isInvalid());
 
     if (!control->isPublic())
       continue;
