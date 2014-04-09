@@ -1,8 +1,8 @@
 Series {
   ~ DeltaRatio: "delta_ratio.mrs"
 
-  + (public) delta_threshold = 0.5
-  + (public) peak_threshold = 1.2
+  + public delta_threshold = 0.5
+  + public peak_threshold = 1.2
 
   -> ShiftInput { winSize = (2 * /inSamples) } -> Windowing
 

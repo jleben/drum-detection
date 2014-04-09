@@ -1,12 +1,12 @@
 Series {
   ~ DeltaRatio: "delta_ratio.mrs"
 
-  + (public) input = ""
-  + (public) output = ""
-  + (public) win_size = 2048
-  + (public) hop_size = 1024
-  + (public) delta_threshold = 0.5
-  + (public) peak_threshold = 1.3
+  + public input = ""
+  + public output = ""
+  + public win_size = 2048
+  + public hop_size = 1024
+  + public delta_threshold = 0.5
+  + public peak_threshold = 2.0
 
   + done = (sndfile/hasData == false)
 
