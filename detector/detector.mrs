@@ -1,6 +1,4 @@
 Series {
-  ~ DeltaRatio: "delta_ratio.mrs"
-
   + public input = ""
   + public output = ""
   + public win_size = 2048
@@ -14,22 +12,15 @@ Series {
 
   -> sndfile: SoundFileSource { filename = /input }
 
-  -> ShiftInput { winSize = (2 * /inSamples) } -> Windowing
-
+  -> ShiftInput { winSize = (2 * /inSamples) }
+  -> Windowing
   -> Spectrum -> PowerSpectrum
 
   -> Fanout
   {
-    -> Series
-    {
-        -> DeltaRatio
-        -> Threshold { value = /delta_threshold }
-        -> Memory { memSize = 18 }
-        -> PeakerOnset
-        {
-          lookAheadSamples = 4
-          threshold = /peak_threshold
-        }
+    -> onsets: "onsets.mrs" {
+      delta_threshold = /delta_threshold
+      peak_threshold = /peak_threshold
     }
 
     -> Series {

@@ -1,11 +1,15 @@
-Series {
-  ~ DeltaRatio: "delta_ratio.mrs"
+// Expected input = power spectrum
 
-  + public threshold = 0.5
+Series
+{
+  + public delta_threshold = 0.0
 
-  -> ShiftInput { winSize = (2 * /inSamples) } -> Windowing
+  // For each bin, compute log ratio with previous bin:
+  -> Memory { memSize = 2 }
+  -> Transposer
+  -> Ratio { mode = "log10" }
+  -> Transposer
 
-  -> Spectrum -> PowerSpectrum
-
-  -> DeltaRatio -> Threshold { value = /threshold }
+  // Count observations above threshold:
+  -> Threshold { value = /delta_threshold }
 }

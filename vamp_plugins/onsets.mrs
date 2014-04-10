@@ -1,0 +1,15 @@
+Series {
+  + public delta_threshold = 0.5
+  + public peak_threshold = 1.2
+
+  -> ShiftInput { winSize = (2 * /inSamples) }
+  -> Windowing
+  -> Spectrum -> PowerSpectrum
+
+  -> process: "../onsets.mrs"
+  {
+    delta_threshold = /delta_threshold
+    peak_threshold = /peak_threshold
+  }
+}
+

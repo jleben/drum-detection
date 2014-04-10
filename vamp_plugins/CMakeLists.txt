@@ -9,6 +9,12 @@ set( sources
   vamp_marsyas_plugin.cpp
 )
 
+set(marsyas_scripts
+  centroid.mrs
+  onset_function.mrs
+  onsets.mrs
+)
+
 add_library( marsyas_vamp_plugin MODULE ${sources} )
 
 include_directories(${VAMP_SDK_INCLUDE_DIR})
@@ -22,3 +28,8 @@ set_target_properties( marsyas_vamp_plugin PROPERTIES
 if(CMAKE_SYSTEM_NAME MATCHES Linux)
   install( TARGETS marsyas_vamp_plugin DESTINATION "lib/vamp" )
 endif()
+
+install(
+  FILES ${marsyas_scripts}
+  DESTINATION "/home/jakob/.config/marsyas/scripts/vamp"
+)

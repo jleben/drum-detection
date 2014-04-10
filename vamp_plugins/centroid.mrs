@@ -1,7 +1,7 @@
-Series 
+Series
 {
-  -> ShiftInput { winSize = (2 * /inSamples) } -> Windowing
-
+  -> ShiftInput { winSize = (2 * /inSamples) }
+  -> Windowing
   -> Spectrum -> PowerSpectrum
 
   -> Memory{memSize=3}

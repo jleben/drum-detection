@@ -1,0 +1,9 @@
+Series {
+  + public delta_threshold = 0.5
+
+  -> ShiftInput { winSize = (2 * /inSamples) }
+  -> Windowing
+  -> Spectrum -> PowerSpectrum
+
+  -> process: "../onset_function.mrs" { delta_threshold = /delta_threshold }
+}

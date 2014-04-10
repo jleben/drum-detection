@@ -1,14 +1,11 @@
-Series {
-  ~ DeltaRatio: "delta_ratio.mrs"
+// Expected input = power spectrum
 
+Series
+{
   + public delta_threshold = 0.5
   + public peak_threshold = 1.2
 
-  -> ShiftInput { winSize = (2 * /inSamples) } -> Windowing
-
-  -> Spectrum -> PowerSpectrum
-
-  -> DeltaRatio -> Threshold { value = /delta_threshold }
+  -> f: "onset_function.mrs" { delta_threshold = /delta_threshold }
 
   -> Memory { memSize = 18 }
 

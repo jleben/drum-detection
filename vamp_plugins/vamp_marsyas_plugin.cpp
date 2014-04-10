@@ -362,7 +362,7 @@ int get_dir_entries(string dir, vector<string> &files)
 
 std::vector<string> find_scripts()
 {
-  std::string script_location("/home/jakob/.config/marsyas/scripts");
+  std::string script_location("/home/jakob/.config/marsyas/scripts/vamp");
   std::vector<string> scripts;
   get_dir_entries(script_location, scripts);
   return scripts;
