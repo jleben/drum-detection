@@ -26,6 +26,22 @@ if(VAMP_SDK_LIB AND VAMP_SDK_INCLUDE_DIR)
   set(VAMP_SDK_FOUND TRUE)
 endif()
 
+## Options
+
+if(WIN32)
+  set(base $ENV{LOCALAPPDATA})
+  if(NOT base)
+    set(base $ENV{HOMEPATH})
+  endif()
+  set(default_script_dir "${base}/marsyas/scripts")
+elseif(APPLE)
+  set(default_script_dir "$ENV{HOME}/Library/Application Support/marsyas/scripts")
+else()
+  set(default_script_dir "$ENV{HOME}/.local/share/marsyas/scripts")
+endif()
+
+set(MARSYAS_SCRIPT_DIR ${default_script_dir} CACHE PATH "Location of shared Marsyas scripts.")
+
 ##
 
 add_subdirectory(detector)

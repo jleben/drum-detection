@@ -1,3 +1,7 @@
+#ifndef MARSYAS_SCRIPT_DIR
+#error Undefined 'MARSYAS_SCRIPT_DIR'!
+#endif
+
 #include "vamp_marsyas_plugin.hpp"
 
 #include <marsyas/system/MarSystemManager.h>
@@ -362,7 +366,7 @@ int get_dir_entries(string dir, vector<string> &files)
 
 std::vector<string> find_scripts()
 {
-  std::string script_location("/home/jakob/.config/marsyas/scripts/vamp");
+  std::string script_location( MARSYAS_SCRIPT_DIR "/vamp" );
   std::vector<string> scripts;
   get_dir_entries(script_location, scripts);
   return scripts;

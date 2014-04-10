@@ -18,6 +18,9 @@ set(marsyas_scripts
 add_library( marsyas_vamp_plugin MODULE ${sources} )
 
 include_directories(${VAMP_SDK_INCLUDE_DIR})
+
+add_definitions("-DMARSYAS_SCRIPT_DIR=\"${MARSYAS_SCRIPT_DIR}\"")
+
 target_link_libraries( marsyas_vamp_plugin ${VAMP_SDK_LIB} marsyas )
 
 set_target_properties( marsyas_vamp_plugin PROPERTIES
@@ -31,5 +34,5 @@ endif()
 
 install(
   FILES ${marsyas_scripts}
-  DESTINATION "/home/jakob/.config/marsyas/scripts/vamp"
+  DESTINATION "${MARSYAS_SCRIPT_DIR}/vamp"
 )

@@ -36,5 +36,5 @@ target_link_libraries(detector ${MARSYAS_LIB})
 
 install(
   FILES ${scripts}
-  DESTINATION "/home/jakob/.config/marsyas/scripts"
+  DESTINATION "${MARSYAS_SCRIPT_DIR}"
 )
