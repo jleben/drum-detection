@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <string>
 
 using namespace Marsyas;
 using namespace std;
@@ -59,6 +60,8 @@ int main(int argc, char *argv[])
   mrs_real block_duration = block_size / sample_rate;
 
   MarControlPtr output = system->getControl("mrs_realvec/processedData");
+  assert(!output.isInvalid());
+
   std::vector<onset> onsets;
   unsigned int block = 0;
   const unsigned int block_offset = 5;
@@ -68,6 +71,9 @@ int main(int argc, char *argv[])
     system->tick();
 
     const realvec & data = output->to<realvec>();
+
+    assert(data.getSize() == 2);
+
     if (!(data(0) > 0.0))
     {
       ++block;
