@@ -1,11 +1,10 @@
-// Expected input = power spectrum
+// Expected input = spectrum
 
 Series
 {
-  + public delta_threshold = 0.5
-  + public peak_threshold = 1.2
+  + public peak_threshold = 1.0
 
-  -> f: "onset_function.mrs" { delta_threshold = /delta_threshold }
+  -> f: "onset_function.mrs"
 
   -> Memory { memSize = 18 }
 

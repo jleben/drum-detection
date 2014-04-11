@@ -1,15 +1,7 @@
-// Expected input = power spectrum
+// Expected input = spectrum
 
 Series
 {
-  + public delta_threshold = 0.0
-
-  // For each bin, compute log ratio with previous bin:
-  -> Memory { memSize = 2 }
-  -> Transposer
-  -> Ratio { mode = "log10" }
-  -> Transposer
-
-  // Count observations above threshold:
-  -> Threshold { value = /delta_threshold }
+  -> PowerSpectrum { spectrumType = "logmagnitude" }
+  -> Flux { mode = "Laroche2003" }
 }

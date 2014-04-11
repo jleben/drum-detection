@@ -1,9 +1,8 @@
 Series {
   + public input = ""
   + public output = ""
-  + public win_size = 2048
-  + public hop_size = 1024
-  + public delta_threshold = 0.5
+  + public win_size = 1024
+  + public hop_size = 512
   + public peak_threshold = 2.0
 
   + done = (sndfile/hasData == false)
@@ -14,16 +13,18 @@ Series {
 
   -> ShiftInput { winSize = (2 * /inSamples) }
   -> Windowing
-  -> Spectrum -> PowerSpectrum
+  -> Spectrum
 
   -> Fanout
   {
-    -> onsets: "onsets.mrs" {
-      delta_threshold = /delta_threshold
+    -> onsets: "onsets.mrs"
+    {
       peak_threshold = /peak_threshold
     }
 
-    -> Series {
+    -> Series
+    {
+      -> PowerSpectrum
       -> Memory{memSize=3}
       -> Sum { mode = "sum_observations" }
       -> Centroid
