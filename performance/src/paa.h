@@ -62,12 +62,50 @@ private:
         uint32_t uOut;
     } trMap;
 
+    struct statistics
+    {
+      float onset_accuracy;
+      float onset_precision;
+      float onset_recall;
+      float type_accuracy;
+      float dynamics_accuracy;
+    };
+
+    typedef vector<trMap> type_map;
+
+    struct confusion_matrix
+    {
+        vector<int> types;
+        vector< vector<int> > data;
+
+        confusion_matrix( const type_map & );
+
+        int row_count() const { return types.size() + 2; }
+        int column_count() const { return types.size() + 2; }
+
+        int typeIndex( int type )
+        {
+            for (int i = 0; i < types.size(); ++i)
+            {
+                if (type == types[i])
+                    return i;
+            }
+            return -1;
+        }
+
+        void print( std::ostream & out );
+    };
+
     // Method[s]
     bool acquireMap(string name, vector<trMap> &map);
     void acquireEvents(string name, vector<trEvent> &onset, vector<trMap> map);
     void range(float fValue, float fTolerance, float fUpperLimit,
                float fLowerLimit, float &fUpper, float &fLower);
-	void confusionMatrix(ostream &out, vector<trEvent> &reference, vector<trEvent> &measure, vector<trMap> &map);
+    void computeStatistics(ostream &out, vector<trEvent> &reference,
+                           vector<trEvent> &measure,
+                           vector<trMap> &map,
+                           statistics & stats,
+                           confusion_matrix & matrix);
 
     // Data
     bool     mbVerbose;

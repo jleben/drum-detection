@@ -230,23 +230,27 @@ bool Paa::run(ostream &out)
 		cout << "dynamic match: " << muDynamicMatch << endl;
 	}
 	
-	// Compute statistics
-    fOnsetAccuracy = (0 == reference.size()) ? 0 :
-                        ((float)muOnsetMatch/(float)reference.size())*100.0f;
-    fTypeAccuracy = (0 == muOnsetMatch) ? 0 :
-                        ((float)muTypeMatch/(float)muOnsetMatch)*100.0f;
-    fDynamicAccuracy = (0 == muOnsetMatch) ? 0 :
-                        ((float)muDynamicMatch/(float)muOnsetMatch)*100.0f;
 
-    // Display statistics
-    out.precision(1);
-    out.setf(ios::fixed, ios::floatfield);
-    out << "onset accuracy: " << fOnsetAccuracy << "%" << endl;
-    out << "type accuracy: " << fTypeAccuracy << "%" << endl;
-    out << "dynamic accuracy: " << fDynamicAccuracy << "%" << endl;
+    // Output statistics
 
-	// Display confusion matrix
-	confusionMatrix(cout, reference, measure, map);
+    out << setprecision(1) << fixed;
+
+    statistics stats;
+    confusion_matrix matrix(map);
+
+    stats.dynamics_accuracy = muOnsetMatch ? (float) muDynamicMatch / muOnsetMatch : 0;
+    computeStatistics(out, reference, measure, map, stats, matrix);
+
+    out << "Onset:"
+         << " A = " << stats.onset_accuracy * 100 << "%"
+         << " | P = " << stats.onset_precision * 100 << "%"
+         << " | R = " << stats.onset_recall * 100 << "%" << endl;
+
+    out << "Type = " << stats.type_accuracy * 100 << "%" << endl;
+    out << "Strength = " << stats.dynamics_accuracy * 100 << "%" << endl;
+
+    out << "Confusion matrix:" << endl;
+    matrix.print(out);
 
     // Write to listing file
     if (mbListing)
@@ -497,21 +501,10 @@ void Paa::range(float fValue, float fTolerance, float fUpperLimit,
   //fUpper = ((fValue + fTolerance) > fUpperLimit) ? fUpperLimit : fValue + fTolerance;
 }
 
-int typeIndex( int type, vector<int> & types )
+Paa::confusion_matrix::confusion_matrix( const type_map & map )
 {
-    for (int i = 0; i < types.size(); ++i)
-    {
-        if (type == types[i])
-            return i;
-    }
-    return -1;
-}
-
-void Paa::confusionMatrix(ostream &out, vector<trEvent> &reference, vector<trEvent> &measure, vector<trMap> &map)
-{
-    vector<int> types;
-
     // Build type vector
+
     for (uint32_t uIndex = 0; uIndex < map.size(); uIndex++)
     {
         vector<int>::iterator i = find(types.begin(), types.end(), map.at(uIndex).uOut);
@@ -521,20 +514,74 @@ void Paa::confusionMatrix(ostream &out, vector<trEvent> &reference, vector<trEve
         }
     }
 
-    int total_cols = types.size() + 2;
-    int total_rows = types.size() + 2;
+    // Allocate data space
+
+    for (int i = 0; i < row_count(); ++i)
+    {
+        data.emplace_back( column_count(), 0 );
+    }
+}
+
+void Paa::confusion_matrix::print( std::ostream & out )
+{
+    int total_cols = column_count();
+    int total_rows = row_count();
 
     int unmapped_col = total_cols - 2;
     int missed_col = total_cols - 1;
     int unmapped_row = total_rows - 2;
     int ghost_row = total_rows - 1;
 
-    vector< vector<int> > matrix;
+    out << setw(8) << "ref/det";
+    for (int i = 0; i < types.size(); ++i)
+        out << setw(8) << types[i];
+    out << setw(8) << "other";
+    out << setw(8) << "missed";
+    out << endl;
 
-    for (int i = 0; i < total_rows; ++i)
+    for (int r = 0; r < types.size(); ++r)
     {
-        matrix.emplace_back( total_cols, 0 );
+        out << setw(8) << types[r];
+        for (int c = 0; c < total_cols; ++c)
+        {
+            out << setw(8) << data[r][c];
+        }
+        out << endl;
     }
+
+    out << setw(8) << "other";
+    for (int c = 0; c < total_cols; ++c)
+    {
+        out << setw(8) << data[unmapped_row][c];
+    }
+    out << endl;
+
+    out << setw(8) << "ghost";
+    for (int c = 0; c < (total_cols - 1); ++c)
+    {
+        out << setw(8) << data[ghost_row][c];
+    }
+    out << endl;
+}
+
+void Paa::computeStatistics(ostream &out, vector<trEvent> &reference,
+                           vector<trEvent> &measure,
+                           vector<trMap> &map,
+                           statistics & stats,
+                           confusion_matrix & matrix)
+{
+    int total_cols = matrix.column_count();
+    int total_rows = matrix.row_count();
+
+    int unmapped_col = total_cols - 2;
+    int missed_col = total_cols - 1;
+    int unmapped_row = total_rows - 2;
+    int ghost_row = total_rows - 1;
+
+    unsigned int detected_count = 0;
+    unsigned int misdetected_count = 0;
+    unsigned int missed_count = 0;
+    unsigned int ghost_count = 0;
 
     for (int refIndex = 0; refIndex < reference.size(); ++refIndex)
     {
@@ -542,17 +589,26 @@ void Paa::confusionMatrix(ostream &out, vector<trEvent> &reference, vector<trEve
         int col = missed_col;
 
         trEvent & refEvent = reference[refIndex];
-        row = typeIndex(refEvent.uType, types);
+        row = matrix.typeIndex(refEvent.uType);
 
         if (refEvent.bMatch)
         {
             trEvent & detectedEvent = measure[refEvent.uReference];
-            col = typeIndex(detectedEvent.uType, types);
+            col = matrix.typeIndex(detectedEvent.uType);
             if (col == -1)
                 col = unmapped_col;
+
+            if (detectedEvent.uType == refEvent.uType)
+              detected_count++;
+            else
+              misdetected_count++;
+        }
+        else
+        {
+          missed_count++;
         }
 
-        matrix[row][col]++;
+        matrix.data[row][col]++;
     }
 
     for (int detIndex = 0; detIndex < measure.size(); ++detIndex)
@@ -560,44 +616,26 @@ void Paa::confusionMatrix(ostream &out, vector<trEvent> &reference, vector<trEve
         trEvent & detectedEvent = measure[detIndex];
         if (!detectedEvent.bMatch)
         {
-            int col = typeIndex(detectedEvent.uType, types);
+            int col = matrix.typeIndex(detectedEvent.uType);
             if (col == -1)
                 col = unmapped_col;
 
-            matrix[ghost_row][col]++;
+            matrix.data[ghost_row][col]++;
+
+            ghost_count++;
         }
     }
 
-    cout << "confusion matrix:" << endl;
+    int total_count = detected_count + misdetected_count + missed_count + ghost_count;
 
-    cout << setw(8) << "ref/det";
-    for (int i = 0; i < types.size(); ++i)
-        cout << setw(8) << types[i];
-    cout << setw(8) << "other";
-    cout << setw(8) << "missed";
-    cout << endl;
-
-    for (int r = 0; r < types.size(); ++r)
-    {
-        cout << setw(8) << types[r];
-        for (int c = 0; c < total_cols; ++c)
-        {
-            cout << setw(8) << matrix[r][c];
-        }
-        cout << endl;
-    }
-
-    cout << setw(8) << "other";
-    for (int c = 0; c < total_cols; ++c)
-    {
-        cout << setw(8) << matrix[unmapped_row][c];
-    }
-    cout << endl;
-
-    cout << setw(8) << "ghost";
-    for (int c = 0; c < (total_cols - 1); ++c)
-    {
-        cout << setw(8) << matrix[ghost_row][c];
-    }
-    cout << endl;
+    stats.onset_accuracy =
+        (float) (detected_count + misdetected_count) / total_count;
+    stats.onset_precision =
+        (float) (detected_count + misdetected_count) /
+        (detected_count + misdetected_count + ghost_count);
+    stats.onset_recall =
+        (float) (detected_count  + misdetected_count) /
+        (detected_count  + misdetected_count + missed_count);
+    stats.type_accuracy =
+        (float) detected_count / (detected_count + misdetected_count);
 }
