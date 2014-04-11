@@ -488,8 +488,13 @@ void Paa::acquireEvents(string name, vector<trEvent> &onset, vector<trMap> map)
 void Paa::range(float fValue, float fTolerance, float fUpperLimit,
                float fLowerLimit, float &fUpper, float &fLower)
 {
-    fLower  = ((fValue-fTolerance) < fLowerLimit) ? fLowerLimit : fValue-fTolerance;
-	fUpper = ((fValue + fTolerance) > fUpperLimit) ? fUpperLimit : fValue + fTolerance;
+  // Disregard global limits.
+  // Detected onsets may be (slightly) negative or beyond end of audio,
+  // but still admissible.
+  fLower = fValue - fTolerance;
+  fUpper = fValue + fTolerance;
+  //fLower  = ((fValue-fTolerance) < fLowerLimit) ? fLowerLimit : fValue-fTolerance;
+  //fUpper = ((fValue + fTolerance) > fUpperLimit) ? fUpperLimit : fValue + fTolerance;
 }
 
 int typeIndex( int type, vector<int> & types )
