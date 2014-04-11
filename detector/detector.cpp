@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <iomanip>
 
 using namespace Marsyas;
 using namespace std;
@@ -63,8 +64,8 @@ int main(int argc, char *argv[])
   assert(!output.isInvalid());
 
   std::vector<onset> onsets;
-  unsigned int block = 0;
-  const unsigned int block_offset = 5;
+  int block = 0;
+  const int block_offset = 5;
 
   while(!done_control->to<bool>())
   {
