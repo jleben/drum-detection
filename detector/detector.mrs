@@ -3,7 +3,7 @@ Series {
   + public output = ""
   + public win_size = 1024
   + public hop_size = 512
-  + public peak_threshold = 2.0
+  + public peak_threshold = 1.7
 
   + done = (sndfile/hasData == false)
 

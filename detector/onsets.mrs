@@ -3,12 +3,13 @@
 Series
 {
   + public peak_threshold = 1.0
+  + public confidence = peaker/confidence
 
   -> f: "onset_function.mrs"
 
   -> Memory { memSize = 18 }
 
-  -> PeakerOnset
+  -> peaker: PeakerOnset
   {
     lookAheadSamples = 4
     threshold = /peak_threshold

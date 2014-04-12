@@ -61,7 +61,9 @@ int main(int argc, char *argv[])
   mrs_real block_duration = block_size / sample_rate;
 
   MarControlPtr output = system->getControl("mrs_realvec/processedData");
+  MarControlPtr confidence_ctl = system->remoteControl("onsets/confidence");
   assert(!output.isInvalid());
+  assert(!confidence_ctl.isInvalid());
 
   std::vector<onset> onsets;
   int block = 0;
@@ -72,10 +74,11 @@ int main(int argc, char *argv[])
     system->tick();
 
     const realvec & data = output->to<realvec>();
+    mrs_real confidence = confidence_ctl->to<mrs_real>();
 
     assert(data.getSize() == 2);
 
-    if (!(data(0) > 0.0))
+    if (!(data(0) > 0.0) || confidence < 10.0 / 100.0)
     {
       ++block;
       continue;
