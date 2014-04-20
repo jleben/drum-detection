@@ -215,10 +215,13 @@ Vamp::Plugin::OutputList VampPlugin::getOutputDescriptors() const
     out.hasFixedBinCount = true;
     if (m_system)
     {
+#if 1
       mrs_natural in_rate = m_system->getControl("mrs_natural/inSamples")->to<mrs_natural>();
       mrs_natural out_rate = m_system->getControl("mrs_natural/onSamples")->to<mrs_natural>();
       float input_output_rate_ratio = (float) out_rate / (float) in_rate;
       out.sampleRate = m_input_sample_rate * input_output_rate_ratio;
+#endif
+      out.sampleRate = m_input_sample_rate / (m_step_size * out_rate);
       out.binCount = m_system->getControl("mrs_natural/onObservations")->to<mrs_natural>();
     }
 
