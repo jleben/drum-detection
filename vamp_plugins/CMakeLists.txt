@@ -12,6 +12,7 @@ set( sources
 set(marsyas_scripts
   centroid.mrs
   onset_function.mrs
+  rms.mrs
   onsets.mrs
 )
 

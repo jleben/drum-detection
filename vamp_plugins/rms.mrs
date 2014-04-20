@@ -1,0 +1,11 @@
+Series {
+  -> MixToMono
+  -> ShiftInput { winSize = (2 * /inSamples) }
+  -> Rms
+  // three samples, with the center one matching the onset
+  -> DelaySamples { delay = 2 } -> Memory { memSize = 3 }
+  -> MaxMin // sample 0 = max, sample 1 = min
+  -> Transposer
+  -> Selector { disable = 1 }
+}
+
