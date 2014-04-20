@@ -24,7 +24,7 @@ public:
     ~Map();
 
     // Method[s]
-    bool read(uint32_t &uIn, uint32_t &uOut);
+    bool read(uint32_t &uIn, uint32_t &uOut, float &strength_scale);
 
     bool eventRead(float &fTimestamp, uint32_t &uType, float &fStrength);
 

@@ -12,6 +12,8 @@
 #ifndef _PAA_H
 #define _PAA_H
 
+#include <cmath>
+
 // C L A S S
 class Paa : public App
 {
@@ -54,13 +56,66 @@ private:
         uint32_t uReference;
         float    fTimestamp;
         uint32_t uType;
+        uint32_t original_type;
         float    fStrength;
     } trEvent;
+
     typedef struct
     {
         uint32_t uIn;
         uint32_t uOut;
+        float strength_scale;
+
+        float rms (float velocity) const
+        {
+            return velocity * velocity * strength_scale;
+        }
     } trMap;
+
+    struct type_map
+    {
+        vector<trMap> mappings;
+
+        int size() const { return (int) mappings.size(); }
+
+        const trMap * find(size_t source_type) const
+        {
+            for (unsigned int i = 0; i < mappings.size(); ++i)
+            {
+                if (mappings[i].uIn == source_type)
+                    return &mappings[i];
+            }
+            return 0;
+        }
+
+        const trMap * find_source(size_t target_type) const
+        {
+            for (unsigned int i = 0; i < mappings.size(); ++i)
+            {
+                if (mappings[i].uOut == target_type)
+                    return &mappings[i];
+            }
+            return 0;
+        }
+
+        uint32_t type( uint32_t source_type ) const
+        {
+            const trMap *m = find(source_type);
+            if (m)
+                return m->uOut;
+            else
+                return source_type;
+        }
+
+        uint32_t source_type( uint32_t target_type ) const
+        {
+            const trMap *m = find_source(target_type);
+            if (m)
+                return m->uIn;
+            else
+                return target_type;
+        }
+    };
 
     struct statistics
     {
@@ -70,8 +125,6 @@ private:
       float type_accuracy;
       float dynamics_accuracy;
     };
-
-    typedef vector<trMap> type_map;
 
     struct confusion_matrix
     {
@@ -98,14 +151,16 @@ private:
 
     // Method[s]
     bool acquireMap(string name, vector<trMap> &map);
-    void acquireEvents(string name, vector<trEvent> &onset, vector<trMap> map);
+    void acquireEvents(string name, vector<trEvent> &onset,
+                       const type_map &, bool do_map);
     void range(float fValue, float fTolerance, float fUpperLimit,
                float fLowerLimit, float &fUpper, float &fLower);
     void computeStatistics(ostream &out, vector<trEvent> &reference,
                            vector<trEvent> &measure,
-                           vector<trMap> &map,
                            statistics & stats,
                            confusion_matrix & matrix);
+
+
 
     // Data
     bool     mbVerbose;

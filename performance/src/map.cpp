@@ -40,7 +40,7 @@ bool Map::eventRead(float &fTimestamp, uint32_t &uType, float &fStrength)
     return false;
 }
 
-bool Map::read(uint32_t &uIn, uint32_t &uOut)
+bool Map::read(uint32_t &uIn, uint32_t &uOut, float &strength_scale)
 {
     uint16_t uColumn;
     string   line;
@@ -70,8 +70,11 @@ bool Map::read(uint32_t &uIn, uint32_t &uOut)
                 case 1:
 
                     stringstream(field) >> uOut;
-                    return true;
+                    break;
 
+                case 2:
+                    stringstream(field) >> strength_scale;
+                    return true;
 
                 default:
 

@@ -16,6 +16,7 @@ using namespace std;
 // S Y S T E M  I N C L U D E S
 #include <cstdint>
 #include <cassert>
+#include <cmath>
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -74,7 +75,7 @@ bool Paa::run(ostream &out)
     float            fDynamicAccuracy;
     vector<trEvent>  reference;
     vector<trEvent>  measure;
-    vector<trMap>    map;
+    type_map         map;
 
     // Check for help request
     if (option(cOptionHelp))
@@ -107,7 +108,7 @@ bool Paa::run(ostream &out)
     }
 
     // Acquire map
-    if (!acquireMap(mMap, map))
+    if (!acquireMap(mMap, map.mappings))
     {
         cerr << "error: unable to acquire map" << endl;
 
@@ -121,7 +122,7 @@ bool Paa::run(ostream &out)
 	}
 
     try {
-        acquireEvents(mReference, reference, map);
+        acquireEvents(mReference, reference, map, true);
     }
     catch (std::exception & e)
     {
@@ -131,7 +132,7 @@ bool Paa::run(ostream &out)
     }
 
     try {
-        acquireEvents(mMeasure, measure, map);
+        acquireEvents(mMeasure, measure, map, false);
     }
     catch (std::exception & e)
     {
@@ -191,6 +192,8 @@ bool Paa::run(ostream &out)
 
     // Count matches.
 
+    cout << setprecision(3) << fixed;
+
     // Iterate over reference events:
     for (int referenceIndex = 0; referenceIndex < reference.size(); referenceIndex++)
     {
@@ -214,11 +217,26 @@ bool Paa::run(ostream &out)
               cfDynamicUpperLimit, cfDynamicLowerLimit,
               fDynamicUpper, fDynamicLower);
 
+        //float strength = map.source_strength(detectedEvent.fStrength, referenceEvent.uType);
+        float strength = detectedEvent.fStrength;
+
         // Check strength match
-        if ( (detectedEvent.fStrength >= fDynamicLower) &&
-             (detectedEvent.fStrength <= fDynamicUpper) )
+        bool strength_match = false;
+        if ( (strength >= fDynamicLower) &&
+             (strength <= fDynamicUpper) )
         {
+            strength_match = true;
             muDynamicMatch++;
+        }
+
+        if (mbVerbose)
+        {
+            cout << "Comparing strength: " << strength
+                 << " to " << referenceEvent.fStrength
+                 << " [" << referenceEvent.original_type << "]"
+                 << " (" << fDynamicLower << " - " << fDynamicUpper << ")"
+                 << (strength_match ? " : OK" : " : WRONG")
+                 << endl;
         }
     }
 
@@ -239,7 +257,7 @@ bool Paa::run(ostream &out)
     confusion_matrix matrix(map);
 
     stats.dynamics_accuracy = muOnsetMatch ? (float) muDynamicMatch / muOnsetMatch : 0;
-    computeStatistics(out, reference, measure, map, stats, matrix);
+    computeStatistics(out, reference, measure, stats, matrix);
 
     out << "Onset:"
          << " A = " << stats.onset_accuracy * 100 << "%"
@@ -326,17 +344,7 @@ bool Paa::run(ostream &out)
             trEvent rEvent = measure.at(uIndex);
 
             // Inverse map the type
-            for (uint32_t uEntry = 0; uEntry < map.size(); uEntry++)
-            {
-                // Check type
-                if (rEvent.uType == map.at(uEntry).uOut)
-                {
-                    // Set type
-                    rEvent.uType = map.at(uEntry).uIn;
-
-                    break;
-                }
-            }
+            rEvent.uType = map.source_type(rEvent.uType);
 
             // Write event
             if (!resynthesis.eventWrite(rEvent.fTimestamp, rEvent.uType,
@@ -423,7 +431,7 @@ bool Paa::acquireMap(string name, vector<trMap> &map)
     }
 
     // Read events
-    while (mapFile.read(rMap.uIn, rMap.uOut))
+    while (mapFile.read(rMap.uIn, rMap.uOut, rMap.strength_scale))
     {
         map.push_back(rMap);
     }
@@ -431,7 +439,8 @@ bool Paa::acquireMap(string name, vector<trMap> &map)
     return true;
 }
 
-void Paa::acquireEvents(string name, vector<trEvent> &onset, vector<trMap> map)
+void Paa::acquireEvents(string name, vector<trEvent> &onset,
+                        const type_map &map, bool do_map)
 {
     uint32_t  uIndex;
     File     *pFile;
@@ -458,7 +467,7 @@ void Paa::acquireEvents(string name, vector<trEvent> &onset, vector<trMap> map)
     }
 
     // Read events
-    while (pFile->eventRead(rEvent.fTimestamp, rEvent.uType, rEvent.fStrength))
+    while (pFile->eventRead(rEvent.fTimestamp, rEvent.original_type, rEvent.fStrength))
     {
         // Check for non-zero signal strength
         if (rEvent.fStrength > 0.0f)
@@ -466,17 +475,16 @@ void Paa::acquireEvents(string name, vector<trEvent> &onset, vector<trMap> map)
             // Initialize attributes
             rEvent.bMatch     = false;
             rEvent.uReference = 0;
+            rEvent.uType = rEvent.original_type;
 
-            // Map type
-            for (uIndex = 0; uIndex < map.size(); uIndex++)
+            // Map type and strength
+            if (do_map)
             {
-                // Check type
-                if (rEvent.uType == map.at(uIndex).uIn)
+                const trMap *mapping = map.find(rEvent.original_type);
+                if (mapping)
                 {
-                    // Set type
-                    rEvent.uType = map.at(uIndex).uOut;
-
-                    break;
+                    rEvent.uType = mapping->uOut;
+                    rEvent.fStrength = mapping->rms(rEvent.fStrength);
                 }
             }
 
@@ -505,12 +513,12 @@ Paa::confusion_matrix::confusion_matrix( const type_map & map )
 {
     // Build type vector
 
-    for (uint32_t uIndex = 0; uIndex < map.size(); uIndex++)
+    for (uint32_t uIndex = 0; uIndex < map.mappings.size(); uIndex++)
     {
-        vector<int>::iterator i = find(types.begin(), types.end(), map.at(uIndex).uOut);
+        vector<int>::const_iterator i = find(types.begin(), types.end(), map.mappings.at(uIndex).uOut);
         if (i == types.end())
         {
-            types.push_back(map.at(uIndex).uOut);
+            types.push_back(map.mappings.at(uIndex).uOut);
         }
     }
 
@@ -566,7 +574,6 @@ void Paa::confusion_matrix::print( std::ostream & out )
 
 void Paa::computeStatistics(ostream &out, vector<trEvent> &reference,
                            vector<trEvent> &measure,
-                           vector<trMap> &map,
                            statistics & stats,
                            confusion_matrix & matrix)
 {
@@ -590,6 +597,8 @@ void Paa::computeStatistics(ostream &out, vector<trEvent> &reference,
 
         trEvent & refEvent = reference[refIndex];
         row = matrix.typeIndex(refEvent.uType);
+        if (row == -1)
+            row = unmapped_row;
 
         if (refEvent.bMatch)
         {
