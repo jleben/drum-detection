@@ -1,3 +1,23 @@
 - drum onset effect is sometimes spilled across more than one onset function sample
 - kick drum badly detected - prbly due to lower bin resolution at low freq
 - plosive voice sounds are very prominent
+
+
+- Problem: weird peaks in onset detection function late in the tail of kicks, toms, snares
+  -> A lot of ghosts
+  - You can see the onset function fluctuating increasignly towards the tail,
+    resulting in a relatively prominent peak.
+
+- Peak selection:
+  - Threshold as multiple of mean does not seem to do the best job:
+    It requires high threshold with slowly fluctuating low-level noise (tails of hits)
+    But requires low threshold with multiple successive hits
+  >> Perhaps better: peak ratio over the lowest point in the past?
+  >> Perhaps an absolute threshold for peaks?
+
+- Try correct imbalance between low and high freq hit detection:
+>> Using mel spectrum instead of spectrum as basis for onset detection function
+  - This makes kicks more prominent, highs less prominent
+  - Perhaps over-corrects?
+  - Produces more of the above problem with ghosts (bogus peaks in onset function)
+    at kicks and toms
