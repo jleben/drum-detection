@@ -22,7 +22,7 @@ process_reference() {
   reference=$1
   base=`basename $reference .mid`
   object=$eval_dir/$base.onsets
-  cmd="$evaluator -m $map_file -o 50 $reference $object"
+  cmd="$evaluator -m $map_file -o 40 -d 20 $reference $object"
   echo $cmd
   echo "" >> $output
   echo "$reference <> $object" >> $output
