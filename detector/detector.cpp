@@ -8,6 +8,7 @@
 #include <fstream>
 #include <string>
 #include <iomanip>
+#include <cmath>
 
 using namespace Marsyas;
 using namespace std;
@@ -65,6 +66,11 @@ int main(int argc, char *argv[])
   assert(!output.isInvalid());
   assert(!confidence_ctl.isInvalid());
 
+  MarSystem *rms_sys = system->remoteSystem("rms");
+  assert(rms_sys);
+  MarControlPtr rms_out = rms_sys->getControl("mrs_real/value");
+  assert(!rms_out.isInvalid());
+
   std::vector<onset> onsets;
   int block = 0;
   const int block_offset = 5;
@@ -74,9 +80,9 @@ int main(int argc, char *argv[])
     system->tick();
 
     const realvec & data = output->to<realvec>();
-    mrs_real confidence = confidence_ctl->to<mrs_real>();
-
     assert(data.getSize() == 2);
+
+    mrs_real confidence = confidence_ctl->to<mrs_real>();
 
     if (!(data(0) > 0.0) || confidence < 10.0 / 100.0)
     {
@@ -85,6 +91,8 @@ int main(int argc, char *argv[])
     }
 
     mrs_real centroid = data(1);
+
+    double rms = rms_out->to<mrs_real>();
 
     onset o;
 
@@ -97,7 +105,7 @@ int main(int argc, char *argv[])
     else
       o.type = 2;
 
-    o.strength = 1.0;
+    o.strength = rms;
 
     onsets.push_back(o);
 
