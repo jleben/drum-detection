@@ -343,8 +343,13 @@ bool Paa::run(ostream &out)
             // Copy event
             trEvent rEvent = measure.at(uIndex);
 
-            // Inverse map the type
-            rEvent.uType = map.source_type(rEvent.uType);
+            // Inverse map type and strength
+            const trMap *mapping = map.find_source(rEvent.uType);
+            if (mapping)
+            {
+                rEvent.uType = mapping->uIn;
+                rEvent.fStrength = mapping->velocity(rEvent.fStrength);
+            }
 
             // Write event
             if (!resynthesis.eventWrite(rEvent.fTimestamp, rEvent.uType,

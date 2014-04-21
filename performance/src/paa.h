@@ -70,6 +70,11 @@ private:
         {
             return velocity * velocity * strength_scale;
         }
+
+        float velocity (float rms) const
+        {
+            return std::sqrt( rms / strength_scale );
+        }
     } trMap;
 
     struct type_map
