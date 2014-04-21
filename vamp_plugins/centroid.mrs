@@ -7,4 +7,5 @@ Series
   -> Memory{memSize=3}
   -> Sum { mode = "sum_observations" }
   -> Centroid
+  -> DelaySamples{delay=2}
 }
