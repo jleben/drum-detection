@@ -174,12 +174,12 @@ size_t VampPlugin::getMaxChannelCount() const
 
 size_t VampPlugin::getPreferredBlockSize() const
 {
-    return 0;
+    return 512;
 }
 
 size_t VampPlugin::getPreferredStepSize() const
 {
-    return 0;
+    return 512;
 }
 
 VampPlugin::ParameterList VampPlugin::getParameterDescriptors() const
