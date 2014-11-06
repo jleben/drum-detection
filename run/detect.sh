@@ -6,18 +6,27 @@ if [ -z $root_dir ] || [ -z $detector ]; then
   exit 1
 fi
 
-process_root() {
-  for sample in `find $root_dir -name *.wav`
-  do process_sample $sample
-  done
-}
+shopt -s globstar
+for file in $root_dir/**
+do
+  #echo "File: $file"
+  if [[ $file =~ .*\.wav ]]
+  then
+    dir=`dirname "$file"`
+    #echo "Dir: $dir"
+    if [[ $dir =~ $root_dir/(.*) ]]
+    then
+      out_dir=${BASH_REMATCH[1]}
+    else
+      echo "Could not get relative dir"
+      exit 1
+    fi
+    #echo "Output dir: $out_dir"
 
-process_sample() {
-  sample=$1
-  output=`basename $sample .wav`.onsets
-  cmd="$detector $sample $output"
-  echo $cmd
-  $cmd
-}
-
-process_root
+    mkdir -p "$out_dir"
+    out_file="$out_dir/`basename "$file" .wav`.onsets"
+    cmd="$detector \"$file\" \"$out_file\""
+    echo $cmd
+    $detector "$file" "$out_file"
+  fi
+done
