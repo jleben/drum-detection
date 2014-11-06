@@ -45,5 +45,4 @@ set(MARSYAS_SCRIPT_DIR ${default_script_dir} CACHE PATH "Location of shared Mars
 ##
 
 add_subdirectory(detector)
-add_subdirectory(vamp_plugins)
 add_subdirectory(performance)
