@@ -2,7 +2,7 @@
 
 #include <marsyas/system/MarSystemManager.h>
 #include <marsyas/script/script.h>
-#include <marsyas/script/manager.hpp>
+#include <marsyas/script/manager.h>
 
 #include <iostream>
 #include <fstream>
