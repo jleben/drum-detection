@@ -661,7 +661,6 @@ uint16_t Midifile::bigEndian(uint16_t uValue)
 bool Midifile::noteOn(uint32_t &uTimestamp, uint32_t &uNote, uint32_t &uVelocity)
 {
 	static bool bOnce = false;
-	trTrack	    rTrack;
 
 	// Check for first call.
 	if (!bOnce)
