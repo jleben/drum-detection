@@ -698,7 +698,7 @@ bool Midifile::noteOn(uint32_t &uTimestamp, uint32_t &uNote, uint32_t &uVelocity
 		if ((eEventMeta == mrEvent.eEvent) && (eMetaEndOfTrack == mrEvent.eMeta))
 		{
 			// Check track index.
-			if (++muTrack >= muTracks)
+			if (++muTrack > muTracks)
 			{
 				return false;
 			}
@@ -726,7 +726,7 @@ bool Midifile::seekToTrack(uint32_t uTrack)
 	uint32_t uOffset;
 
 	// Check track index.
-	if (uTrack >= muTracks)
+	if (uTrack > muTracks)
 	{
 		return false;
 	}
